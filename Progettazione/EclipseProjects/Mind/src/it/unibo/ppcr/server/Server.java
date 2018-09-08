@@ -14,14 +14,14 @@ import it.unibo.ppcr.ai.PPCR;
 public class Server {
 
 	public static void main(String[] args) throws IOException {
-		ServerSocket listener = new ServerSocket(1800);
+		ServerSocket listener = new ServerSocket(8019);
 		PPCR.init();
 
 		// TEST
 		boolean testLamp = true;
 
 		System.out.println("Server started!");
-		hueClient.setAddress("192.168.1.5");
+		//hueClient.setAddress("192.168.1.5");
 
 		Socket socket = listener.accept();
 		PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -29,7 +29,7 @@ public class Server {
 
 		String nextMove = PPCR.getNextMove("clear");
 		System.out.println(nextMove);
-		out.println("manageCommands(SENDER, data(" + nextMove + "))\n");
+		out.println("robotCmd(SENDER, data(" + nextMove + "))\n");
 		if (testLamp)
 			hueClientSpecific.blink();
 
@@ -54,7 +54,7 @@ public class Server {
 					}
 
 					else {
-						nextMove = "manageCommands(SENDER, data(" + nextMove + "))\n";
+						nextMove = "robotCmd(SENDER, data(" + nextMove + "))\n";
 						System.out.println("Sending:" + nextMove);
 						out.println(nextMove);
 					}

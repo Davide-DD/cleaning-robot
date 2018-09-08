@@ -5,10 +5,10 @@ const commandLineArgs = require('command-line-args')
 var PORT_SOFFRITTI = 8999;
 var ADDRESS_SOFFRITTI = '127.0.0.1';
 
-var PORT_QACTOR = 1800;
+var PORT_QACTOR = 8019;
 var ADDRESS_QACTOR = '127.0.0.1';
 
-var msgNum = 1;
+var msgNum = 0;
 var ignoreCollisions = false;
 var command;
 var onlyW = false;
@@ -51,7 +51,7 @@ var log = options.log
 
 //Funzioni di timeout
 function sendClear() {
-	var msg = "msg(consoleCmd,event,qaconsoleproban_ctrl,none,consoleCmd(clear)," + msgNum + ")";
+	var msg = "msg(robotAnswerMid,event,qamiddleware_ctrl,none,robotAnswerMid(clear)," + msgNum + ")";
 	if (toQActorSocket !== null) {
 		if (log) console.log('Sending to QA node: '.green + msg);
 		toQActorSocket.write(msg + "\n");
@@ -63,7 +63,7 @@ function sendObstacle() {
 	if (secondPart)
 		sendClear();
 	else {
-		var msg = "msg(consoleCmd,event,qaconsoleproban_ctrl,none,consoleCmd(obstacle)," + msgNum + ")";
+		var msg = "msg(robotAnswerMid,event,qamiddleware_ctrl,none,robotAnswerMid(obstacle)," + msgNum + ")";
 		if (toQActorSocket !== null) {
 			if (log) console.log('Sending to QA node: '.green + msg);
 			toQActorSocket.write(msg + "\n");
@@ -91,21 +91,43 @@ toQActorSocket.connect(PORT_QACTOR, ADDRESS_QACTOR, function () {
 	if (log) console.log(('Connected to QA node (' + ADDRESS_QACTOR + ':' + PORT_QACTOR + ')').bold);
 });
 
+// ------------- WAIT FOR MIDDLEWARE READY ------------- 
+
+var msg = "msg(robotAnswerMid,event,qamiddleware_ctrl,none,robotAnswerMid(ready),"+msgNum+")";
+if (log) console.log('Attempting to send a ready message to QActor:'.green + msg );
+
+toQActorSocket.write(msg + "\n");
+msgNum += 1;
+if (log) console.log('Message sent.'.green);
+
+
 toQActorSocket.on('error', function (err) {
 	if (log) console.log("Error: " + err.message);
 })
 
+var qaanswer = "";
+var dataTemp = "";
+
 toQActorSocket.on('data', function (data) {
 	//ESEMPIO:
-	//Formato di arrivo dal QActor: manageCommands(SENDER, data(w, 300))
+	//Formato di arrivo dal QActor: robotCmd(buslog, data(w, 300))
 	//Formato che vuole Soffritti: { "type": "moveForward", "arg": 300 }
-	if (log) console.log('\nReceived from QA node: '.green + ("" + data).trim());
-	dataToString = "" + data;
-	if (dataToString.includes("\n")) {
-		data = dataToString.substring(dataToString.indexOf(",") + 1);
-		temp = data.substring(data.indexOf(",") + 1);
+	qaanswer = qaanswer + data;
+	if (qaanswer === "") return;
+	if (data.includes("\n")) {
+		if (log) console.log('\nReceived from QA node: '.green + ("" + qaanswer).trim());
+		
+		// Remove spaces inside qaanswer
+		qaanswer = qaanswer.replace(/\s+/g, '');
+		dataTemp = qaanswer.substring(qaanswer.indexOf(",")+ 1);
+		console.log("dataTemp: " + dataTemp);
+		temp = dataTemp.substring(dataTemp.indexOf(","));
+		console.log("temp: " + temp);
 		timeReceived = temp.substring(1, temp.indexOf(')'));
-		direction = data.split(",")[0].substring(6);
+		console.log("timeReceived: " + timeReceived);
+		direction = dataTemp.split(",")[0].substring(5);
+		console.log("direction: " + direction);
+		qaanswer = ""; // reset answer
 		directionForSoffritti = "";
 		switch (direction) {
 			case "w":
@@ -128,19 +150,22 @@ toQActorSocket.on('data', function (data) {
 			case "secondPart":
 				if (log) console.log("\nSECOND PART STARTED (ASTAR)!\n".bold)
 				secondPart = true;
-				sendClear();
+				//sendClear();
+				setTimeout(sendClear, timeToWait);
 				return;
 		}
+		command = JSON.stringify({ "type": directionForSoffritti, "arg": timeReceived });
+		if (log) console.log('Sending to Soffritti node: '.cyan + command);
+		toSoffrittiSocket.write(command);
+		initialDate = new Date();
+		if (log) console.log('Waiting ' + timeToWait + 'ms to see if a collision message arrives from Soffritti node...');
+		//Se dopo aver inviato il comando, non ricevo alcun messaggio di "collision", 
+		//significa che il path è libero e quindi devo mandare "clear" al QA node
+		collisionReceived = 0;
+		timeout = setTimeout(sendClear, timeToWait);
+		
 	}
-	command = JSON.stringify({ "type": directionForSoffritti, "arg": timeReceived });
-	if (log) console.log('Sending to Soffritti node: '.cyan + command);
-	toSoffrittiSocket.write(command);
-	initialDate = new Date();
-	if (log) console.log('Waiting ' + timeToWait + 'ms to see if a collision message arrives from Soffritti node...');
-	//Se dopo aver inviato il comando, non ricevo alcun messaggio di "collision", 
-	//significa che il path è libero e quindi devo mandare "clear" al QA node
-	collisionReceived = 0;
-	timeout = setTimeout(sendClear, timeToWait);
+	
 
 });
 
@@ -157,6 +182,7 @@ toSoffrittiSocket.connect(PORT_SOFFRITTI, ADDRESS_SOFFRITTI, function () {
 toSoffrittiSocket.on('error', function (err) {
 	if (log) console.log("Error: " + err.message);
 })
+
 
 toSoffrittiSocket.on('data', function (data) {
 	var jsonData = JSON.parse(("" + data).substring(1, data.length - 2));
