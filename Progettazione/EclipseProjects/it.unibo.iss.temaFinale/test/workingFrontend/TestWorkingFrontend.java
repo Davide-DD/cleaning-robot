@@ -25,7 +25,7 @@ public class TestWorkingFrontend {
 	 *  Se vengono modificati i nomi degli attori, sostituire anche quelli mantenendo il suffisso _ctrl.
 	 *    
 	 *  
-	 *  N.B.: AvoidFix e R-AvoidMobile sono intrinsecamente rispettati dalla strategia di IA. Quindi, non serve un test
+	 *  N.B.: R-AvoidFix e R-AvoidMobile sono intrinsecamente rispettati dalla strategia di IA. Quindi, non serve un test
 	 *  
 	 **/
 
@@ -59,11 +59,11 @@ public class TestWorkingFrontend {
 				
 				Thread.sleep(250);
 				
-				frontend = new TestActor(QActorUtils.getQActor("qafrontendactivator_ctrl"));
+				frontend = new TestActor(QActorUtils.getQActor("qafrontend_ctrl"));
 				mindOfRobot = new TestActor(QActorUtils.getQActor("qamindofrobotproban_ctrl"));
 				
 				realRobot = new TestActor(QActorUtils.getQActor("qarobotproban_ctrl"));
-				realRobot.getDict().put("rFloorClean", "");
+				realRobot.getDict().put("rFloorClean", "rFloorClean");
 				
 				// In questo momento, virtual e real coincidono. Una volta separati, eliminare la riga sotto e scommentare quelle che seguono
 				virtualRobot = realRobot;
@@ -71,16 +71,16 @@ public class TestWorkingFrontend {
 				// virtualRobot.getDict().put("rFloorClean", "");
 				
 				businessLogic = new TestActor(QActorUtils.getQActor("qabusinesslogicproban_ctrl"));
-				businessLogic.getDict().put("rStart", ""); 
+				businessLogic.getDict().put("rStart", "rStart"); 
 				businessLogic.getDict().put("rTempAndTimeOk", "systemmodel( name(application), value(on) )"); 
-				businessLogic.getDict().put("rStop", ""); 
+				businessLogic.getDict().put("rStop", "rStop"); 
 				businessLogic.getDict().put("rTempKo", "systemmodel( name(application), value(off) )"); 
 				businessLogic.getDict().put("rTimeKo", "systemmodel( name(application), value(off) )"); 
-				businessLogic.getDict().put("rObstacle", "");
-				businessLogic.getDict().put("rEnd", "");
+				businessLogic.getDict().put("rObstacle", "rStop");
+				businessLogic.getDict().put("rEnd", "rStop");
 				
 				led = new TestActor(QActorUtils.getQActor("qaledproban_ctrl"));
-				led.getDict().put("rBlinkLed", "ledmodel( name(genericled), value(on) )");
+				led.getDict().put("rBlinkLed", "rBlinkLed");
 				led.getDict().put("rStop", "ledmodel( name(genericled), value(off) )");
 				led.getDict().put("rTempKo", "ledmodel( name(genericled), value(off) )");
 				led.getDict().put("rTimeKo", "ledmodel( name(genericled), value(off) )");
@@ -88,14 +88,13 @@ public class TestWorkingFrontend {
 				led.getDict().put("rEnd", "ledmodel( name(genericled), value(off) )");
 				
 				// Valgono le stesse considerazioni che valgono per il robot
-				hue = led;
-				// hue = new TestActor(QActorUtils.getQActor("qaledproban_ctrl"));
-				// hue.getDict().put("rBlinkHue", "ledmodel( name(genericled), value(on) )");
-				// hue.getDict().put("rStop", "ledmodel( name(genericled), value(on) )");
-				// hue.getDict().put("rTempKo", "ledmodel( name(genericled), value(on) )");
-				// hue.getDict().put("rTimeKo", "ledmodel( name(genericled), value(on) )");
-				// hue.getDict().put("rObstacle", "ledmodel( name(genericled), value(on) )");
-				// hue.getDict().put("rEnd", "ledmodel( name(genericled), value(on) )");
+				hue = new TestActor(QActorUtils.getQActor("qahuelamp_ctrl"));
+				hue.getDict().put("rBlinkHue", "rBlinkHue");
+				hue.getDict().put("rStop", "ledmodel( name(huelamp), value(off) )");
+				hue.getDict().put("rTempKo", "ledmodel( name(huelamp), value(off) )");
+				hue.getDict().put("rTimeKo", "ledmodel( name(huelamp), value(off) )");
+				hue.getDict().put("rObstacle", "ledmodel( name(huelamp), value(off) )");
+				hue.getDict().put("rEnd", "ledmodel( name(huelamp), value(off) )");
 			}
 			startSystem();
 		} catch( Exception e) {
@@ -106,7 +105,7 @@ public class TestWorkingFrontend {
 	protected void startSystem() {
 		frontend.getActor().emit("consoleCmd", "consoleCmd(start)");
 		try {
-			Thread.sleep(3000);
+			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -131,11 +130,11 @@ public class TestWorkingFrontend {
 		try {
 			frontend.getActor().emit("consoleCmd", "consoleCmd(start)"); // Avvio il sistema
 			Thread.sleep(2000);
-			mindOfRobot.getActor().emit("thought", "thought(w)");
+			mindOfRobot.getActor().emit("robotEvent", "robotEvent(mind, w)");
 			
 			Thread.sleep(250);
 			
-			SolveInfo sol = realRobot.getActor().solveGoal(businessLogic.getDict().get("rFloorClean"));
+			SolveInfo sol = realRobot.getActor().solveGoal(realRobot.getDict().get("rFloorClean"));
 			assertTrue("", sol.isSuccess());
 			
 			sol = virtualRobot.getActor().solveGoal(virtualRobot.getDict().get("rFloorClean"));
@@ -170,9 +169,9 @@ public class TestWorkingFrontend {
 		try {
 			frontend.getActor().emit("consoleCmd", "consoleCmd(start)");
 			
-			Thread.sleep(250);
+			Thread.sleep(1000);
 			
-			SolveInfo sol = businessLogic.getActor().solveGoal(led.getDict().get("rStart"));
+			SolveInfo sol = businessLogic.getActor().solveGoal(businessLogic.getDict().get("rStart"));
 			assertTrue("", sol.isSuccess());
 			
 			sol = led.getActor().solveGoal(led.getDict().get("rBlinkLed"));
@@ -205,7 +204,7 @@ public class TestWorkingFrontend {
 			frontend.getActor().emit("timeEvent", "timeEvent(10)");
 			frontend.getActor().emit("tempEvent", "tempEvent(20)");
 			
-			Thread.sleep(8000);
+			Thread.sleep(1000);
 			
 			SolveInfo sol = businessLogic.getActor().solveGoal(businessLogic.getDict().get("rTempAndTimeOk"));
 			assertTrue("", sol.isSuccess());
