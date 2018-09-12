@@ -1,0 +1,45 @@
+import it.unibo.qactors.QActorContext;
+import it.unibo.qactors.QActorUtils;
+import it.unibo.qactors.akka.QActor;
+import it.unibo.system.SituatedSysKb;
+
+public class CtxRun implements Runnable {
+
+	private String name, systemTheoryName, systemRulesFile;
+	private String actorId;
+	private QActor qactor;
+	
+	public void run(String name, String systemTheoryName, String systemRulesFile) {
+		this.name = name;
+		this.systemTheoryName = systemTheoryName;
+		this.systemRulesFile = systemRulesFile;
+	}
+	
+	public void setActorId(String actorId) {
+		this.actorId = actorId;
+	}
+	
+	public QActor getQActor() {
+		return qactor;
+	}
+	
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		try {
+			QActorContext.initQActorSystem(name, systemTheoryName, systemRulesFile, 
+					SituatedSysKb.standardOutEnvView, null, false);
+			
+			while(qactor == null) {
+				
+				Thread.sleep(250);
+								
+				qactor = QActorUtils.getQActor(actorId);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+}

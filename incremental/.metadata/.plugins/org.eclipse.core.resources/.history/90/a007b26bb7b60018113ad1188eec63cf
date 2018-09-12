@@ -1,0 +1,17 @@
+/*
+*
+* A GraphViz DOT FSM description 
+* Please use a GraphViz visualizer (like http://www.webgraphviz.com)
+*  
+*/
+
+digraph finite_state_machine {
+	rankdir=LR
+	size="8,5"
+	
+	init [ color = red ][ fontcolor = red ][ penwidth = 3 ]
+	putOnHold [ color = blue ][ fontcolor = blue ][ penwidth = 3 ]
+	
+	putOnHold -> putOnHold [ label = "repeat "][ style = dashed ][ color = blue ][ fontcolor = blue ]
+	init -> putOnHold [ label = "switch" ][ color = black ][ fontcolor = black ]
+}

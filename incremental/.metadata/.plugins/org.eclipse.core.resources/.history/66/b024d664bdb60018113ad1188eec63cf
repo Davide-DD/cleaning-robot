@@ -1,0 +1,2 @@
+plan(1,init, sentence(true,move(print("SENSORE SUL ROBOT: simulo la rilevazione di collisioni")),'','' ))
+plan(2,init, sentence(true,delay( 8000) ,'','' ))

@@ -1,0 +1,20 @@
+/*
+*
+* A GraphViz DOT FSM description 
+* Please use a GraphViz visualizer (like http://www.webgraphviz.com)
+*  
+*/
+
+digraph finite_state_machine {
+	rankdir=LR
+	size="8,5"
+	
+	init [ color = red ][ fontcolor = red ][ penwidth = 3 ]
+	handleThinking [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	waitForThinkingRequest [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	
+	waitForThinkingRequest -> handleToutBuiltIn [ label = "timeout(300000)" ][ color = green ][ fontcolor = green ]
+	waitForThinkingRequest -> waitForThinkingRequest [ label = "repeat "][ style = dashed ][ color = blue ][ fontcolor = blue ]
+	waitForThinkingRequest -> handleThinking [ label = "thinkingRequest" ][ color = red ][ fontcolor = red ][ dir = both ]
+	init -> waitForThinkingRequest [ label = "switch" ][ color = black ][ fontcolor = black ]
+}
