@@ -92,8 +92,7 @@ QActor qafrontend context progCtx {
 }
 
 QActor qabusinesslogicproban context progCtx {
-	Rules {		
-		
+	Rules {				
 		systemmodel( name(application), value(off) ).
 		switchSystemState(on) :-
 			systemmodel( name(application), value(off) ),
@@ -202,11 +201,11 @@ QActor qabusinesslogicproban context progCtx {
     Plan handleRobotAnswer [   
      	
      	onMsg robotAnswer : robotAnswer('obstacle') -> {
-     			println("ROBOT TO BUSINESS LOGIC: C'è un ostacolo.");
+     			println("ROBOT TO BUSINESS LOGIC: C'ï¿½ un ostacolo.");
      			emit thinkingRequest : thinkingRequest('obstacle' )
      	};
      	onMsg robotAnswer : robotAnswer('clear') -> {
-     			println("ROBOT TO BUSINESS LOGIC: Il campo è libero.");
+     			println("ROBOT TO BUSINESS LOGIC: Il campo ï¿½ libero.");
      			emit thinkingRequest : thinkingRequest('clear')
      	}
      		
@@ -381,9 +380,11 @@ QActor qarobotproban context progCtx {
   
     Plan waitForCommand[  ]  
     transition stopAfter 100000 
-     	whenMsg robotCmd -> handleCmd
+        whenEvent robotEvent -> handleCmd, // for testing purposes
+     	whenMsg robotCmd -> handleCmd 
     
-     Plan handleCmd [   
+     Plan handleCmd [  
+     	addRule rFloorClean; 
      	println("ROBOT: command received!");
      	//printCurrentMessage;  
     	onMsg robotCmd : robotCmd("buslog", 'w') -> 
@@ -443,11 +444,11 @@ QActor qasoffrittirobot context progCtx {
      	
      Plan robotResponse [
      	onEvent robotAnswerMid : robotAnswerMid('clear') -> {
-     			println("Il campo è libero, informo la business logic.");
+     			println("Il campo ï¿½ libero, informo la business logic.");
      			forward qabusinesslogicproban -m robotAnswer : robotAnswer('clear')
      		};
      	onEvent robotAnswerMid : robotAnswerMid('obstacle') -> {
-     			println("C'è un ostacolo, informo la business logic.");
+     			println("C'ï¿½ un ostacolo, informo la business logic.");
      			forward qabusinesslogicproban -m robotAnswer : robotAnswer('obstacle')
      		}
      	
