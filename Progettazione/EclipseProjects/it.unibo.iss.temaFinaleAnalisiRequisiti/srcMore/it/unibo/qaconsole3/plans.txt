@@ -1,0 +1,4 @@
+plan(1,init, sentence(true,move(print("CONSOLE: acceso")),'','' ))
+plan(2,init, sentence(true,delay( 1000) ,'','' ))
+plan(3,init, sentence(true,move(print("CONSOLE: mando start")),'','' ))
+plan(4,init, sentence(true,forward(qarobot3, consoleMsg,consoleMsg( "start")),'','' ))

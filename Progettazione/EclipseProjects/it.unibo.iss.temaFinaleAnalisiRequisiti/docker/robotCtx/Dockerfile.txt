@@ -1,0 +1,6 @@
+FROM java
+RUN ["apt-get","install","unzip","-y"]
+COPY ["�zipDir��zip�","./"]
+RUN ["unzip","./�zip�","-d","./"]
+EXPOSE -P "�c.ip.port�"
+CMD ["java","-jar","./�zip.substring(0,zip.lastIndexOf('.'))�/�jar�"]

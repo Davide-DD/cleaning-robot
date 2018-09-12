@@ -61,8 +61,8 @@ EventHandler evhcommands for manageCommandsEvent {
 QActor qahuelampemulatoractivator context progCtx {
 	Plan init normal [
 		println("ACTIVATING HUELAMP EMULATOR");
-		delay 1000
-		//javaRun it.unibo.hue.gui.gui.startGui() // CRASHES: why?
+		delay 1000;
+		javaRun it.unibo.hue.gui.gui.startGui() // CRASHES: why?
 	]
 }
 
@@ -174,8 +174,15 @@ QActor qabusinesslogicproban context progCtx {
     ]
     transition stopAfter 30000000 
         whenMsg consoleMsg -> handleStopOrFinished,
-     	whenMsg thoughtMsg : thought(mind, DATA) do
-     		forward qasoffrittirobot -m robotCmd : robotCmd("buslog", DATA ),
+     	whenMsg thoughtMsg : thought(mind, DATA) do {
+     		onMsg thoughtMsg : thought(mind, "finished") ->
+     			emit finished : finished("finishedCleaning");
+     		onMsg thoughtMsg : thought(mind, "cantfinish") ->
+     			emit finished : finished("cantFinish");
+     		onMsg thoughtMsg : thought(mind, "error") ->
+     			emit finished : finished("cantFinish");
+     		onMsg thoughtMsg : thought(mind, DATA) ->
+     			forward qasoffrittirobot -m robotCmd : robotCmd("buslog", DATA )},
      	whenMsg directionReceived -> waitForRobotResponse,
      	whenMsg robotAnswer -> handleRobotAnswer,
      	whenEvent finished -> handleStopOrFinished,
@@ -206,6 +213,8 @@ QActor qabusinesslogicproban context progCtx {
     ] switchTo waitForAlgCmd
     
     Plan handleStopOrFinished [ 
+    	onEvent finished : finished("finishedCleaning") -> println("BUSINESS LOGIC: The floor is clean, stopping");
+    	onEvent finished : finished("cantFinish") -> println("BUSINESS LOGIC: couldn't finish because of obstacle or error");
     	println("STOP command received from console or triggered from application");
     	addRule rStop; // TEST PURPOSES
     	emit ledEvent : ledEvent('off');
@@ -259,7 +268,7 @@ QActor qamindofrobotproban context progCtx {
     	println( "MIND: handleThinking");
     	onMsg thinkingRequestMsg : thinkingRequest('reset') -> {
     		println("ThinkingRequest received: reset");
-    		actorOp getNextMove(clear); // wrong behavior?
+    		actorOp getNextMove(clear);
     		[ ?? actorOpDone( OP, R ) ] {
 	    		emit thought : thought(mind, R);
 	    		forward qabusinesslogicproban -m thinkingRequestReceived : thinkingRequestReceived(ok);
