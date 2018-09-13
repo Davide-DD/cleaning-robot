@@ -27,17 +27,9 @@ public class Qamindofrobotproban extends AbstractQamindofrobotproban {
 	
 	public String getNextMove(String arg) {
 		String nextMove = PPCR.getNextMove(arg);
-		if (nextMove.equalsIgnoreCase("impassableObstacle")) {
-			// stop everything
-		} else if (nextMove.equalsIgnoreCase("obstructedFinalPosition")) {
-			// stop everything
-		} else if (nextMove.equalsIgnoreCase("finished")) {
-			// stop everything
-		} else if (nextMove.equalsIgnoreCase("error")) {
-			// stop everything
-		} else if (nextMove.equalsIgnoreCase("resetCompleted")) {
-			// stop everything
-		} else {
+		if (!(nextMove.equalsIgnoreCase("impassableObstacle") || nextMove.equalsIgnoreCase("obstructedFinalPosition")
+				|| nextMove.equalsIgnoreCase("finished") || nextMove.equalsIgnoreCase("error") 
+				|| nextMove.equalsIgnoreCase("resetCompleted"))) {
 			nextMove = "data(" + nextMove + ")";
 		}
 		

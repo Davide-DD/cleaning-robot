@@ -91,22 +91,34 @@ public class hueClient {
 
 	public static void on(int lamp) {
 		sendGet(null, "lights/" + lamp);
-		if (threads.get(lamp) != null)
+		if (threads.get(lamp) != null) {
 			threads.get(lamp).interrupt();
+			threads.remove(lamp); // Avoiding duplicate threads 
+		}
 		String cmd = "{'on':true, \"bri\":167}";
 		sendPut(null, cmd, "lights/" + lamp + "/state");
 	}
 
 	public static void off(int lamp) {
 		sendGet(null, "lights/" + lamp);
-		if (threads.get(lamp) != null)
+		if (threads.get(lamp) != null) {
 			threads.get(lamp).interrupt();
+			threads.remove(lamp); // Avoiding duplicate threads 
+		}
 		String cmd = "{'on':false}";
 		sendPut(null, cmd, "lights/" + lamp + "/state");
 	}
 
 	public static void blink(int lamp) {
+				
+		// Avoiding duplicate blink threads and waste of resources
+		if (threads.get(lamp) != null) {
+			System.out.println("WARNING: lamp " + lamp + " already blinking, doing nothing.");
+			return;
+		}
+		
 		sendGet(null, "lights/" + lamp);
+		
 		Thread t = new Thread(new Runnable() {
 			public void run() {
 				String cmd = "";

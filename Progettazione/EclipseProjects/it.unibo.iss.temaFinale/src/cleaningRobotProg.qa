@@ -61,8 +61,8 @@ EventHandler evhcommands for manageCommandsEvent {
 QActor qahuelampemulatoractivator context progCtx {
 	Plan init normal [
 		println("ACTIVATING HUELAMP EMULATOR");
-		delay 1000;
-		javaRun it.unibo.hue.gui.gui.startGui() // CRASHES: why?
+		delay 1000
+		// javaRun it.unibo.hue.gui.gui.startGui() // CRASHES: why?
 	]
 }
 
@@ -125,8 +125,8 @@ QActor qabusinesslogicproban context progCtx {
 		println( qabusinesslogicreqan(starts)  );
 		connectAsSubscriber "temperature" ;
 		connectAsSubscriber "hour"
-		// All'inizio, il robot e' fermo (stopped) e la console puï¿½ quindi solo avviarlo,
-		// di conseguenza, l'unico messaggio che potrï¿½ arrivare in waitForUserCmd sarï¿½ consoleCmd('start')
+		// All'inizio, il robot e' fermo (stopped) e la console può quindi solo avviarlo,
+		// di conseguenza, l'unico messaggio che potrà arrivare in waitForUserCmd sarà consoleCmd('start')
 		// Bisogna quindi disabilitare il comando di stop
 	] switchTo waitForFrontendActivation
 	
@@ -163,7 +163,7 @@ QActor qabusinesslogicproban context progCtx {
 
     				// Adesso, il robot e' in movimento, di conseguenza bisogna abilitare il comando di stop
     				// e disabilitare il comando di start. 
-    				// Quindi, nel piano waitForAlgCmd, potrï¿½ arrivare solo consoleCmd(stop)
+    				// Quindi, nel piano waitForAlgCmd, potrè arrivare solo consoleCmd(stop)
     				
     				
     				}
@@ -201,19 +201,25 @@ QActor qabusinesslogicproban context progCtx {
     Plan handleRobotAnswer [   
      	
      	onMsg robotAnswer : robotAnswer('obstacle') -> {
-     			println("ROBOT TO BUSINESS LOGIC: C'ï¿½ un ostacolo.");
+     			println("ROBOT TO BUSINESS LOGIC: C'è un ostacolo.");
      			emit thinkingRequest : thinkingRequest('obstacle' )
      	};
      	onMsg robotAnswer : robotAnswer('clear') -> {
-     			println("ROBOT TO BUSINESS LOGIC: Il campo ï¿½ libero.");
+     			println("ROBOT TO BUSINESS LOGIC: Il campo è libero.");
      			emit thinkingRequest : thinkingRequest('clear')
      	}
      		
     ] switchTo waitForAlgCmd
     
     Plan handleStopOrFinished [ 
-    	onEvent finished : finished("finishedCleaning") -> println("BUSINESS LOGIC: The floor is clean, stopping");
-    	onEvent finished : finished("cantFinish") -> println("BUSINESS LOGIC: couldn't finish because of obstacle or error");
+    	onEvent finished : finished("finishedCleaning") -> {
+    		addRule rEnd;
+    		println("BUSINESS LOGIC: The floor is clean, stopping")
+    	};
+    	onEvent finished : finished("cantFinish") -> {
+    		addRule rObstacle;
+    		println("BUSINESS LOGIC: couldn't finish because of obstacle or error")
+    	};
     	println("STOP command received from console or triggered from application");
     	addRule rStop; // TEST PURPOSES
     	emit ledEvent : ledEvent('off');
@@ -302,7 +308,7 @@ QActor qamindofrobotproban context progCtx {
     	//emit thought : thought(mind, "data(w, 300)");*/
     	
     	
-    	// Ad un certo punto potrï¿½ essere emesso l'evento finished, quando la destinazione ï¿½ stata raggiunta
+    	// Ad un certo punto potrè essere emesso l'evento finished, quando la destinazione è stata raggiunta
     ]
     
 }
@@ -387,16 +393,16 @@ QActor qarobotproban context progCtx {
      	addRule rFloorClean; 
      	println("ROBOT: command received!");
      	//printCurrentMessage;  
-    	onMsg robotCmd : robotCmd("buslog", 'w') -> 
-    				println("ROBOT: Moving forward!");
-    	onMsg robotCmd : robotCmd("buslog", 's') -> 
-    				println("ROBOT: Moving backward!");
-    	onMsg robotCmd : robotCmd("buslog", 'a') ->  
-    				println("ROBOT: Turning left!");
-    	onMsg robotCmd : robotCmd("buslog", 'd') -> 
-    				println("ROBOT: Turning right!");
-    	onMsg robotCmd : robotCmd("buslog", 'x') -> 
-    				println("ROBOT: Stopping!")
+    	onMsg robotCmd : robotCmd("buslog", 'w') ->  {
+    				println("ROBOT: Moving forward!")};
+    	onMsg robotCmd : robotCmd("buslog", 's') -> {
+    				println("ROBOT: Moving backwards!")};
+    	onMsg robotCmd : robotCmd("buslog", 'a') -> { 
+    				println("ROBOT: Turning left!")};
+    	onMsg robotCmd : robotCmd("buslog", 'd') -> {
+    				println("ROBOT: Turning right!")};
+    	onMsg robotCmd : robotCmd("buslog", 'x') -> {
+    				println("ROBOT: Stopping!")}
     ] switchTo robotResponse
     
     
@@ -435,7 +441,7 @@ QActor qasoffrittirobot context progCtx {
     		sendToExternalServer "qamiddleware_ctrl" -m V;
     	forward qabusinesslogicproban -m directionReceived : directionReceived(ok)
     ] switchTo waitForRobotResponse
-    
+   
     
     Plan waitForRobotResponse [
     	println("ROBOT SOFFRITTI: let's see what's in front of me...") // Qui sembra fermarsi non appena si avvia secondpart
@@ -444,11 +450,11 @@ QActor qasoffrittirobot context progCtx {
      	
      Plan robotResponse [
      	onEvent robotAnswerMid : robotAnswerMid('clear') -> {
-     			println("Il campo ï¿½ libero, informo la business logic.");
+     			println("Il campo è libero, informo la business logic.");
      			forward qabusinesslogicproban -m robotAnswer : robotAnswer('clear')
      		};
      	onEvent robotAnswerMid : robotAnswerMid('obstacle') -> {
-     			println("C'ï¿½ un ostacolo, informo la business logic.");
+     			println("C'è un ostacolo, informo la business logic.");
      			forward qabusinesslogicproban -m robotAnswer : robotAnswer('obstacle')
      		}
      	
