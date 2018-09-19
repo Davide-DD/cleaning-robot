@@ -1,0 +1,110 @@
+{  
+   "lights":{  
+      "1":{  
+         "state":{  
+            "on":true,
+            "bri":254,
+            "hue":65535,
+            "sat":254,
+            "xy":[  
+               0.0,
+               0.0
+            ],
+            "ct":0,
+            "alert":"none",
+            "effect":"none",
+            "colormode":"hs",
+            "reachable":true
+         },
+         "type":"Extended color light",
+         "name":"Hue Lamp 1",
+         "modelid":"LCT001",
+         "swversion":"65003148",
+         "uniqueid":"00:17:88:01:00:d4:12:08-0a",
+         "pointsymbol":{  
+            "1":"none",
+            "2":"none",
+            "3":"none",
+            "4":"none",
+            "5":"none",
+            "6":"none",
+            "7":"none",
+            "8":"none"
+         }
+      }
+   },
+   "schedules":{  
+      "1":{  
+         "time":"2012-10-29T12:00:00",
+         "description":"",
+         "name":"schedule",
+         "command":{  
+            "body":{  
+               "scene":null,
+               "on":true,
+               "xy":null,
+               "bri":null,
+               "transitiontime":null
+            },
+            "address":"/api/newdeveloper/groups/0/action",
+            "method":"PUT"
+         }
+      }
+   },
+   "config":{  
+      "portalservices":false,
+      "gateway":"192.168.2.1",
+      "mac":"00:00:88:00:bb:ee",
+      "bridgeid":"000088FFFE00BBEE",
+      "modelid":"BSB001",
+      "swversion":"01005215",
+      "linkbutton":false,
+      "ipaddress":"192.168.2.213:8000",
+      "proxyport":0,
+      "swupdate":{  
+         "text":"",
+         "notify":false,
+         "updatestate":0,
+         "url":""
+      },
+      "netmask":"255.255.255.0",
+      "name":"Philips hue",
+      "dhcp":true,
+      "proxyaddress":"",
+      "whitelist":{  
+         "newdeveloper":{  
+            "name":"test user",
+            "last use date":"2012-10-29T12:00:00",
+            "create date":"2012-10-29T12:00:00"
+         }
+      },
+      "UTC":"2012-10-29T12:05:00"
+   },
+   "groups":{  
+      "1":{  
+         "name":"Group 1",
+         "action":{  
+            "on":true,
+            "bri":254,
+            "hue":33536,
+            "sat":144,
+            "xy":[  
+               0.346,
+               0.3568
+            ],
+            "ct":201,
+            "alert":null,
+            "effect":"none",
+            "colormode":"xy",
+            "reachable":null
+         },
+         "lights":[  
+            "1",
+            "2"
+         ]
+      }
+   },
+   "scenes":{  
+
+   }
+}

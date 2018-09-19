@@ -1,0 +1,71 @@
+/*
+================================================================================
+build_ClientHue.gradle
+GENERATED ONLY ONCE
+USAGE:	 
+	gradle -b build_ClientHue.gradle eclipse	//to set the dependency on the library
+	gradle -b build_ClientHue.gradle build
+================================================================================
+*/
+apply plugin: 'java'
+apply plugin: 'eclipse'
+ 
+
+/*
+--------------------------------------------------------------
+PROPERTIES
+--------------------------------------------------------------
+*/
+version = "1.0"
+sourceCompatibility = "1.8"
+
+/*
+--------------------------------------------------------------
+DIRS
+--------------------------------------------------------------
+*/
+sourceSets {
+	main {
+		java {
+			srcDirs = ['src' ]
+		}
+	}
+	test {
+		 java {
+		   srcDirs = ['test']
+		 }
+	}
+}
+/*
+--------------------------------------------------------------
+DEPENDENCIES
+--------------------------------------------------------------
+*/
+repositories {
+      mavenCentral()
+}
+
+dependencies {
+     // https://mvnrepository.com/artifact/com.typesafe.akka/akka-actor_2.11
+	  compile group: 'com.typesafe.akka', name: 'akka-actor_2.11', version: '2.5.2'
+	 // https://mvnrepository.com/artifact/com.typesafe.akka/akka-remote_2.11
+	 compile group: 'com.typesafe.akka', name: 'akka-remote_2.11', version: '2.5.1'	 
+
+/*
+JSON
+*/
+	  
+	  // https://mvnrepository.com/artifact/org.json/json
+	  compile group: 'org.json', name: 'json', version: '20160810'
+
+
+ // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
+compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5'
+ 
+ 	  compile fileTree(dir: '../it.unibo.libs2018/libs/unibo', include: 'uniboInterfaces.jar')
+	  compile fileTree(dir: '../it.unibo.libs2018/libs/unibo', include: 'unibonoawtsupports.jar')
+	  compile fileTree(dir: '../it.unibo.libs2018/libs/unibo', include: '2p301.jar')
+	  compile fileTree(dir: '../it.unibo.libs2018/libs/unibo', include: 'qa18Akka.jar')
+ 
+ }
+ 

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workingSetManager>
+<workingSet editPageId="org.eclipse.jdt.ui.JavaWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1536785104458_2" label="Requirements Analysis" name="Requirements Analysis">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/2ndIteration" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/1stIteration" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/4thIteration" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/3rdIteration" type="4"/>
+</workingSet>
+<workingSet editPageId="org.eclipse.jdt.ui.JavaWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1536785132812_3" label="Dependencies" name="Dependencies">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/it.unibo.iss.libs" type="4"/>
+</workingSet>
+<workingSet editPageId="org.eclipse.jdt.ui.JavaWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1536785203026_5" label="Project Phase" name="Project Phase">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/projectArchitecture" type="4"/>
+</workingSet>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1536765088387_0" label="Window Working Set" name="Aggregate for window 1536765088387"/>
+</workingSetManager>

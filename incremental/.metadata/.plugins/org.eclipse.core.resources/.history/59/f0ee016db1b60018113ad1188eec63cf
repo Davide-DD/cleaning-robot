@@ -1,0 +1,46 @@
+package secondTest;
+
+import java.util.List;
+
+import it.unibo.qactors.QActorContext;
+import it.unibo.qactors.QActorUtils;
+import it.unibo.qactors.akka.QActor;
+import it.unibo.system.SituatedSysKb;
+
+public class CtxRun implements Runnable {
+
+	private String name, systemTheoryName, systemRulesFile;
+	private String[] actorId;
+	private List<QActor> qactors;
+	
+	public CtxRun(String name, String systemTheoryName, String systemRulesFile, String[] actorId) {
+		this.name = name;
+		this.systemTheoryName = systemTheoryName;
+		this.systemRulesFile = systemRulesFile;
+		this.actorId = actorId;
+	}
+	
+	public List<QActor> getQActor() {
+		return qactors;
+	}
+	
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		try {
+			QActorContext.initQActorSystem(name, systemTheoryName, systemRulesFile, 
+					SituatedSysKb.standardOutEnvView, null, false);
+			
+			while(qactor == null) {
+				
+				Thread.sleep(250);
+								
+				qactor = QActorUtils.getQActor(actorId);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+}

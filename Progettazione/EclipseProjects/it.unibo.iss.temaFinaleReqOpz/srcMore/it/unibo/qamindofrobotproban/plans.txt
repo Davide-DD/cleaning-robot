@@ -1,0 +1,8 @@
+plan(1,init, sentence(true,move(print(qaconsoleproban( starts))),'','' ))
+plan(1,waitForThinkingRequest, sentence(true,move(print("MIND: waitForThinkingRequest")),'','' ))
+plan(1,handleThinking, sentence(true,move(print("MIND: handleThinking")),'','' ))
+plan(2,handleThinking, sentence(true,msgswitch(thinkingRequestMsg, thinkingRequest( "reset") , not here StateMoveNormal),'','' ))
+plan(3,handleThinking, sentence(true,msgswitch(thinkingRequestMsg, thinkingRequest( "deleteMap") , not here StateMoveNormal),'','' ))
+plan(4,handleThinking, sentence(true,msgswitch(thinkingRequestMsg, thinkingRequest( "obstacle") , not here StateMoveNormal),'','' ))
+plan(5,handleThinking, sentence(true,msgswitch(thinkingRequestMsg, thinkingRequest( "clear") , not here StateMoveNormal),'','' ))
+plan(6,handleThinking, sentence(true,move(resumeplan),'','' ))

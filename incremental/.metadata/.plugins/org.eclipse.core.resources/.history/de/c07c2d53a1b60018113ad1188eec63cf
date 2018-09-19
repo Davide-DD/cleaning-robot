@@ -1,0 +1,18 @@
+/*
+*
+* A GraphViz DOT FSM description 
+* Please use a GraphViz visualizer (like http://www.webgraphviz.com)
+*  
+*/
+
+digraph finite_state_machine {
+	rankdir=LR
+	size="8,5"
+	
+	init [ color = red ][ fontcolor = red ][ penwidth = 3 ]
+	waitForTest [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	init [ color = blue ][ fontcolor = blue ][ penwidth = 3 ]
+	
+	waitForTest -> waitForTest [ label = "repeat "][ style = dashed ][ color = blue ][ fontcolor = blue ]
+	waitForTest -> handleToutBuiltIn [ label = "timeout(30000000)" ][ color = green ][ fontcolor = green ]
+}

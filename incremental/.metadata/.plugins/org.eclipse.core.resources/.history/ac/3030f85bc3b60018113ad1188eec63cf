@@ -1,0 +1,210 @@
+/*
+================================================================================
+build_progCtx.gradle
+GENERATED ONLY ONCE
+USAGE:	 
+	gradle -b build_progCtx.gradle eclipse		//to set the dependency on the library
+	gradle -b build_progCtx.gradle build
+	gradle -b build_progCtx.gradle cleanDistDir	//to clean the src directory
+================================================================================
+*/
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'java-library-distribution'
+apply plugin: 'jacoco'
+
+/*
+--------------------------------------------------------------
+PROPERTIES
+--------------------------------------------------------------
+*/
+version = "1.0"
+sourceCompatibility = "1.8"
+ext{
+	mainClassName = "it.unibo.progCtx.MainProgCtx"
+}
+/*
+--------------------------------------------------------------
+DIRS
+--------------------------------------------------------------
+*/
+sourceSets {
+	main {
+		java {
+			srcDirs = ['src' , 'src-gen'  ]
+		}
+	}
+	test {
+		 java {
+		   srcDirs = ['test']
+		 }
+	}
+}
+/*
+--------------------------------------------------------------
+DEPENDENCIES
+--------------------------------------------------------------
+*/
+repositories {
+      mavenCentral()
+}
+dependencies {
+/*
+BASIC SUPPORT (test, akka)
+*/	
+      testCompile 'junit:junit:4.12'
+     // https://mvnrepository.com/artifact/com.typesafe.akka/akka-actor_2.11
+	  compile group: 'com.typesafe.akka', name: 'akka-actor_2.11', version: '2.5.2'
+	 // https://mvnrepository.com/artifact/com.typesafe.akka/akka-remote_2.11
+	 compile group: 'com.typesafe.akka', name: 'akka-remote_2.11', version: '2.5.1'	
+	 // https://mvnrepository.com/artifact/commons-logging/commons-logging
+	 compile group: 'commons-logging', name: 'commons-logging', version: '1.1.1' 
+     
+/*
+UNIBO SUPPORTS
+*/		
+	  compile fileTree(dir: '../libs/unibo', include: 'uniboInterfaces.jar')
+	  compile fileTree(dir: '../libs/unibo', include: 'unibonoawtsupports.jar')
+	  compile fileTree(dir: '../libs/unibo', include: 'uniboEnvBaseAwt.jar')
+	  compile fileTree(dir: '../libs/unibo', include: '2p301.jar')
+	  compile fileTree(dir: '../libs/unibo', include: 'qa18Akka.jar')
+	  compile fileTree(dir: '../libs/http',  include: 'nanoHTTPD.jar')
+/*
+JSON
+*/
+	  
+	  // https://mvnrepository.com/artifact/org.json/json
+	  compile group: 'org.json', name: 'json', version: '20160810'
+	  
+/*
+MQTT
+*/
+ 	// https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.client.mqttv3
+	compile group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version: '1.1.0'
+
+/*
+TO BE ADDED by the application designer: BLUETOOTH
+*/
+	  //compile fileTree(dir: '../it.unibo.iss.libs/libs/bth', include: 'bluecove-2.1.1-SNAPSHOT.jar')
+	  //compile fileTree(dir: '../it.unibo.iss.libs/libs/bth', include: 'bluecove-gpl-2.1.1-SNAPSHOT.jar')
+
+/*
+TO BE ADDED by the application designer: Raspberry GPIO support
+*/	
+// https://mvnrepository.com/artifact/com.pi4j/pi4j-core
+//compile group: 'com.pi4j', name: 'pi4j-core', version: '1.1'
+/*
+TO BE ADDED by the application designer for ButtonLed  
+*/	
+//compile fileTree(dir: '../it.unibo.iss.libs/libs/unibo', include: 'blsHL.jar')
+//compile fileTree(dir: '../it.unibo.iss.libs/libs/unibo', include: 'blsGUI.jar')
+//compile fileTree(dir: '../it.unibo.iss.libs/libs/unibo', include: 'blsRasp.jar')
+
+/*
+TO BE ADDED by the application designer for: RXJAVA
+*/
+	//https://mvnrepository.com/artifact/io.reactivex.rxjava2/rxjava
+	//compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.0.6' 
+}
+
+/*
+TO BE ADDED by the application designer for : 
+*/
+	// https://mvnrepository.com/artifact/log4j/log4j
+    //compile group: 'log4j', name: 'log4j', version: '1.2.16'
+
+
+/*
+--------------------------------------------------------------
+AFTER TEST
+--------------------------------------------------------------
+*/
+test {
+    afterTest { desc, result -> 
+        println "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
+    }
+}
+/*
+---------------------------------------------------------------------
+JAR: incldes src-gen code (excluding Java) in the executable jar
+---------------------------------------------------------------------
+*/
+jar {
+   	from( 'src-gen' ){ include '**/*.*'	 exclude '**/*.java'  }
+ 	manifest {
+ 		attributes "Class-Path": '.  ' + configurations.compile.collect { "lib/"+it.getName() }.join(' ')
+		attributes 'Main-Class': "$mainClassName"
+	}
+}
+distributions {
+    main{
+        baseName = "$mainClassName"
+    }
+}
+/*
+---------------------------------------------------------
+PREPARE DISTRIBUTION
+---------------------------------------------------------
+*/
+task copyInfoForDist << {
+	copy {
+		from 'audio'
+		into 'src/dist/audio/'
+		include '**/*.*'
+ 	}
+	copy { 
+		from 'srcMore'
+		into 'src/dist/srcMore/'
+		include '**/*.*'
+ 	}
+	copy { 
+		from '.'
+		into 'src/dist/'
+		include '*.pl'
+		include '*.html'
+ 	}
+	copy {  
+		from 'src'
+		into 'src/dist/'
+		include '*.qa'
+		include '*.ddr'
+		include '*.baseddr'
+   	}
+}
+task cleanDistDir(type: Delete) {
+	  delete 'src/dist'
+      
+  }
+//jar.dependsOn cleanDistDir
+jar.dependsOn copyInfoForDist
+jar.finalizedBy cleanDistDir
+/*
+---------------------------------------------------------
+TESTING
+---------------------------------------------------------
+*/
+test {
+	testLogging {
+		outputs.upToDateWhen { false }		
+		showStandardStreams = true		
+		events 'failed' , 'passed' //,  'started', 'skipped', 		
+	}
+	
+ 	include '**/Test*.class'
+	test.afterSuite { TestDescriptor suite, TestResult result -> //add closure to be notified
+	if( !suite.parent && result.getTestCount() > 0) { //there is at least one test
+		long elapsedTestTime = result.getEndTime() - result.getStartTime()
+ 		System.out.println("""AFTERTEST Elapsed time for execution of ${result.getTestCount()} test(s):  $elapsedTestTime ms""");
+	}
+	}
+}
+
+test.finalizedBy jacocoTestReport
+
+jacocoTestReport {
+     reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination "${buildDir}/jacocoHtml"
+    }
+}

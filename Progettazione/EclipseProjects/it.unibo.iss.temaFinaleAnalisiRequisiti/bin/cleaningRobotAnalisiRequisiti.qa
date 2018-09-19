@@ -1,0 +1,36 @@
+System cleaningRobotAnalisiRequisiti
+
+Dispatch consoleMsg : consoleMsg( DATA )
+
+Context consoleCtx ip [ host="localhost"  port=8019 ] -g cyan
+Context robotCtx ip [ host="localhost"  port=8020 ] -g yellow
+
+QActor qaconsole context consoleCtx {
+	Plan init normal [ 
+		println("CONSOLE: acceso!");
+		delay 1000;
+		forward qarobot -m consoleMsg : consoleMsg("start");
+		delay 4000;
+		forward qarobot -m consoleMsg : consoleMsg("stop")
+	]
+}
+
+QActor qarobot context robotCtx {
+	Plan init normal [
+		println("ROBOT: in attesa di comandi dalla console!")
+	] switchTo waitForCommands
+	
+	Plan waitForCommands [
+	] transition stopAfter 30000000  
+     	whenMsg consoleMsg -> handleConsoleMsg
+    finally repeatPlan
+    
+    Plan handleConsoleMsg resumeLastPlan [
+    	onMsg consoleMsg : consoleMsg("start") -> {
+    		println("ROBOT: acceso!")
+    	};
+    	onMsg consoleMsg : consoleMsg("stop") -> {
+    		println("ROBOT: spento!")
+    	}
+    ]
+}

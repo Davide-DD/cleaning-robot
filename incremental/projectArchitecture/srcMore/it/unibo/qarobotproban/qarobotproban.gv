@@ -1,0 +1,22 @@
+/*
+*
+* A GraphViz DOT FSM description 
+* Please use a GraphViz visualizer (like http://www.webgraphviz.com)
+*  
+*/
+
+digraph finite_state_machine {
+	rankdir=LR
+	size="8,5"
+	
+	init [ color = red ][ fontcolor = red ][ penwidth = 3 ]
+	handleCmd [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	waitForCommand [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	robotResponse [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	
+	robotResponse -> waitForCommand [ label = "switch" ][ color = black ][ fontcolor = black ]
+	handleCmd -> robotResponse [ label = "switch" ][ color = black ][ fontcolor = black ]
+	init -> waitForCommand [ label = "switch" ][ color = black ][ fontcolor = black ]
+	waitForCommand -> handleToutBuiltIn [ label = "timeout(100000)" ][ color = green ][ fontcolor = green ]
+	waitForCommand -> handleCmd [ label = "robotCmd" ][ color = black ][ fontcolor = black ]
+}

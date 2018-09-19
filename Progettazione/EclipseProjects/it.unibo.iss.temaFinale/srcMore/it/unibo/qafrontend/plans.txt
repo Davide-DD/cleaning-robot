@@ -1,0 +1,2 @@
+plan(1,handleManageCommandsMsg, sentence(true,msgswitch(manageCommandsMsg, manageCommands( "buslog",DATA) , not here StateMoveNormal),'','' ))
+plan(2,handleManageCommandsMsg, sentence(true,move(resumeplan),'','' ))

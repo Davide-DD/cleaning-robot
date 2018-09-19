@@ -1,0 +1,5 @@
+plan(1,init, sentence(true,move(print(qaled( starts))),'','' ))
+plan(1,handleCmd, sentence(true,printCurrentEvent(false),'','' ))
+plan(2,handleCmd, sentence(true,eventswitch(applEvent, »applEvent( "start"), move(print("Blinking!")) ),'','' ))
+plan(3,handleCmd, sentence(true,eventswitch(applEvent, »applEvent( "stop"), move(print("Not blinking...")) ),'','' ))
+plan(4,handleCmd, sentence(true,move(resumeplan),'','' ))

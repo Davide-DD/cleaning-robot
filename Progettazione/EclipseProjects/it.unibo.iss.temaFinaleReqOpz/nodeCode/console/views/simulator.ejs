@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>Console</title>
+  <!-- Bootstrap core CSS-->
+  <link href="stylesheets/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom fonts for this template-->
+  <link href="stylesheets/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Custom styles for this template-->
+  <link href="stylesheets/sb-admin.css" rel="stylesheet">
+</head>
+
+<body class="fixed-nav sticky-footer bg-dark" id="page-top">
+  <!-- Navigation-->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
+    <a class="navbar-brand" href="/">Console</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <span class="navbar-text">
+        <% if (currentUser.name() && currentUser.length !== 0) {%> Ciao, <%= currentUser.name() %>!<% } %>
+      </span>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav navbar-sidenav" id="exampleAccordion">
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Stazione di Controllo">
+          <a class="nav-link" href="/">
+            <i class="fa fa-fw fa-dashboard"></i>
+            <span class="nav-link-text">Stazione di Controllo</span>
+          </a>
+        </li>
+        <li class="nav-item active" data-toggle="tooltip" data-placement="right" title="Simulatore">
+          <a class="nav-link" href="/simulator">
+            <i class="fa fa-fw fa-wrench"></i>
+            <span class="nav-link-text">Simulatore</span>
+          </a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="modal" data-target="#exampleModal">
+            <i class="fa fa-fw fa-sign-out"></i>Esci</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="content-wrapper">
+
+    <div class="container-fluid">
+
+      <h3 class="text-center">Controlli</h3>
+      
+      <form>
+        <div class="row justify-content-center mt-5">
+          <div class="col-6">
+            <div class="form-group">
+              <label for="temperatureControlRange">Temperatura</label>
+              <input type="range" class="form-control-range" id="temperatureControlRange" min="-45" max="45" value="0">
+              <output id="temperatureValue">0</output>
+            </div>
+          </div>
+          <div class="col-md-4 lg-2 text-center">
+            <button type="button" class="btn btn-primary" id="confirmTemperature">Conferma la temperatura</button>
+          </div>
+        </div>
+      </form>
+
+      <form>
+        <div class="row mt-4 mb-3 justify-content-center">
+          <div class="col-6">
+            <div class="form-group">
+              <label for="hourControlRange">Orario</label>
+              <input type="range" class="form-control-range" id="hourControlRange" min="0" max="23" value="12">
+              <output id="hourValue">12</output>
+            </div>
+          </div>
+          <div class="col-md-4 lg-2 text-center">
+            <button type="button" class="btn btn-primary" id="confirmHour">Conferma l'orario</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="text-center">
+        <div id="button-container" class="btn-group">
+          <button class="btn btn-primary" id="deleteMap">Elimina mappa</button>
+        </div>
+      </div>
+      
+    <!-- /.container-fluid-->
+    <!-- /.content-wrapper-->
+    <footer class="sticky-footer">
+      <div class="container">
+        <div class="text-center">
+          <small>Copyright © Andrea Boscarino, Davide Di Donato & Federico Livi (2018)</small>
+        </div>
+      </div>
+    </footer>
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+      <i class="fa fa-angle-up"></i>
+    </a>
+    <!-- Logout Modal-->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Sei sicuro di voler uscire?</h5>
+          </div>
+          <div class="modal-body">Clicca su "Esci" se vuoi confermarlo.</div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Annulla</button>
+            <a class="btn btn-primary" href="/log/out">Esci</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+<!-- Bootstrap core JavaScript-->
+  <script src="javascripts/jquery.min.js"></script>
+  <script src="javascripts/bootstrap.bundle.min.js"></script>
+  <!-- Core plugin JavaScript-->
+  <script src="javascripts/jquery.easing.min.js"></script>
+  <script src="javascripts/sb-admin.min.js"></script>
+  <script src="javascripts/simulatorClient.js"></script>
+
+</html>

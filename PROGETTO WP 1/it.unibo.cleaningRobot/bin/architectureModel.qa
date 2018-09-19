@@ -1,0 +1,34 @@
+System cleaningRobot
+
+Event sensorEvent : sensorEvent( DATA )
+
+Context architectureModelCtx ip [ host="localhost"  port=8019 ] 
+
+
+
+QActor qaappl context architectureModelCtx {
+	Plan init normal [
+		println( qaappl(starts)  );   
+		delay 1000;
+		emit  sensorEvent :  sensorEvent( 20 ) ; 
+		delay 1000;
+		emit  sensorEvent :  sensorEvent( 30 ) ; 
+		delay 1000;
+		emit  sensorEvent :  sensorEvent( 28 ) ; 
+		delay 1000;
+		emit  sensorEvent :  sensorEvent( 35 ) ; 
+		delay 1000
+	]
+}
+
+QActor qaled context architectureModelCtx {
+	Plan init normal [
+		println( qaled(starts)  )
+	]
+}
+
+QActor qarobot context architectureModelCtx {
+	Plan init normal [
+		println( qarobot(starts)  )
+	]
+}

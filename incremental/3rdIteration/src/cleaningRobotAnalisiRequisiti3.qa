@@ -1,0 +1,129 @@
+System cleaningRobotAnalisiRequisiti3
+
+Dispatch consoleMsg : consoleMsg( DATA )
+
+Event environmentalEvent : environmentalEvent( REASON )
+Event collisionEvent : collisionEvent()
+
+Context consoleCtx3 ip [ host="localhost"  port=8019 ] -g cyan
+Context robotCtx3 ip [ host="localhost"  port=8021 ] -g yellow -httpserver
+
+QActor qaconsole3 context consoleCtx3 {
+	Plan init normal [ 
+		println("CONSOLE: acceso");
+		delay 1000;
+		
+		// TODO: Prior to execute JUnit tests, comment code lines from here...
+		println("CONSOLE: mando start");
+		// ASSUNZIONE DA ANALISTA:
+		// il comando start viene inviato solo quando le condizioni
+		// non sono violate, noi per ipotesi imponiamo che non lo siano
+		forward qarobot3 -m consoleMsg : consoleMsg("start")
+		// to here
+	] switchTo putOnHold
+	
+	Plan putOnHold [] finally repeatPlan
+}
+
+QActor qaenvironment context robotCtx3 {
+	Plan init normal [
+		println("ENVIRONMENT: simulo controllo di tempo e temperatura e invio eventi di interruzione a causa di violazione delle precondizioni");
+		delay 5000;
+		// TODO: Prior to execute JUnit tests, comment code line below
+		emit environmentalEvent : environmentalEvent("bad_temp")
+	] switchTo putOnHold
+	
+	Plan putOnHold [] finally repeatPlan
+}
+
+QActor qabusinesslogic context robotCtx3 {
+	Rules {
+		
+		systemmodel( name(application), value(off) ).
+		switchSystemState(on) :-
+			systemmodel( name(application), value(off) ),
+			replaceRule( systemmodel( NAME, value(off) ), systemmodel( NAME, value(on) ) ), !.
+		switchSystemState(off) :-
+			systemmodel( name(application), value(on) ),
+			replaceRule( systemmodel( NAME, value(on) ), systemmodel( NAME, value(off) ) ), !.
+		
+		eval(ge, X, X).
+		eval(ge, X, V) :- eval(gt, X, V).
+		
+		curTemperatureValue(10).
+		curTimeValue(7).
+		
+		evalTemperature(cold) :-
+			curTemperatureValue(V),
+			eval(lt, V, 25).
+		evalTemperature(hot) :-
+			curTemperatureValue(V),
+			eval(ge, V, 25), !.
+			
+		evalTime(good) :-
+			curTimeValue(V),
+			output(curTimeValue(V)),
+			eval(ge, V, 7),
+			eval(lt, V, 11), !.	
+	}
+	
+	Plan init normal [
+		
+	]
+}
+
+QActor qaproximitysensor context robotCtx3 {
+	Plan init normal [
+		println("SENSORE SUL ROBOT: simulo la rilevazione di collisioni");
+		delay 8000;
+		// TODO: Prior to execute JUnit tests, comment code line below
+		emit collisionEvent : collisionEvent()
+	] switchTo putOnHold
+	
+	Plan putOnHold [] finally repeatPlan
+}
+
+QActor qarobot3 context robotCtx3 {
+
+	Plan init normal [
+		println("ROBOT: in attesa di comandi dalla console o eventi di interruzione")
+	] switchTo waitForCommands
+	
+	Plan waitForCommands [
+	] transition stopAfter 30000000  
+     	whenMsg consoleMsg -> handleConsoleMsg,
+     	whenEvent environmentalEvent -> handleEnvironmentalEvent,
+     	whenEvent collisionEvent -> handleCollisionEvent 
+    finally repeatPlan
+    
+    Plan handleConsoleMsg resumeLastPlan [
+    	onMsg consoleMsg : consoleMsg("start") -> {
+    		addRule rStart;
+    		println("ROBOT: acceso da comando console")
+    	};
+    	onMsg consoleMsg : consoleMsg("stop") -> {
+    		addRule rStop;
+    		println("ROBOT: spento da comando console")
+    	}
+    ]
+    
+    Plan handleEnvironmentalEvent resumeLastPlan [
+    	onEvent environmentalEvent : environmentalEvent("bad_temp") -> {
+    		addRule rTempKo;
+    		println("ROBOT: spento a causa di violazione condizioni di temperatura")
+    	};
+    	onEvent environmentalEvent : environmentalEvent("bad_time") -> {
+    		addRule rTimeKo;
+    		println("ROBOT: spento a causa di violazione condizioni di tempo")
+    	}
+    ]
+    
+    Plan handleCollisionEvent resumeLastPlan [
+    	addRule rRobotObstacle;
+    	println("ROBOT: collisione rilevata dal sensore, per capire se è mobile aspetto un po', e se non ricevo più collisioni allora lo è");
+    	println("ROBOT: temporaneamente fermo per collisione");
+    	delay 700;
+    	println("ROBOT: riprendo ad andare, dopo la collisione")
+    	
+    ]
+}

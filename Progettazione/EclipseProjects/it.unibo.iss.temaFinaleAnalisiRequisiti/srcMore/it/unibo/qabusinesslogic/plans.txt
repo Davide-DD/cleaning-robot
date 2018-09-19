@@ -1,0 +1,5 @@
+plan(1,handleEnvEvent, sentence(true,printCurrentEvent(false),'','' ))
+plan(2,handleEnvEvent, sentence(true,eventswitch(timeEvent, »timeEvent( V), not here  GuardMove ),'','' ))
+plan(3,handleEnvEvent, sentence(true,eventswitch(tempEvent, »tempEvent( V), not here  GuardMove ),'','' ))
+plan(4,handleEnvEvent, sentence( evalTime( good),not here StateMoveNormal,'','' ))
+plan(5,handleEnvEvent, sentence(true,move(resumeplan),'','' ))

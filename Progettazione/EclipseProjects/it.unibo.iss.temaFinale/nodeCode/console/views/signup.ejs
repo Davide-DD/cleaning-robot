@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>Console</title>
+  <!-- Bootstrap core CSS-->
+  <link href="stylesheets/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom fonts for this template-->
+  <link href="stylesheets/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Custom styles for this template-->
+  <link href="stylesheets/sb-admin.css" rel="stylesheet">
+</head>
+
+<body class="bg-dark">
+  <div class="container">
+    <% errors.forEach(function(error) { %>
+    <div class="alert alert-danger" role="alert">
+      <%= error %>
+    </div>
+  <% }) %>
+
+  <% infos.forEach(function(info) { %>
+    <div class="alert alert-info" role="alert">
+      <%= info %>
+    </div>
+  <% }) %>
+  </div>
+    <div class="card card-register mx-auto mt-5">
+      <div class="card-header">Registra un account</div>
+      <div class="card-body">
+        <form action="/signup" method="post">
+          <div class="form-group">
+            <div class="form-row">
+              <div class="col-md-6">
+                <label for="firstName">Nome</label>
+                <input class="form-control" id="firstName" name="firstName" type="text" aria-describedby="nameHelp" placeholder="Inserisci il tuo nome">
+              </div>
+              <div class="col-md-6">
+                <label for="lastName">Cognome</label>
+                <input class="form-control" id="lastName" name="lastName" type="text" aria-describedby="nameHelp" placeholder="Inserisci il tuo cognome">
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="email">Indirizzo e-mail</label>
+            <input class="form-control" id="email" name="email" type="email" aria-describedby="emailHelp" placeholder="Inserisci la tua e-mail">
+          </div>
+          <div class="form-group">
+            <div class="form-row">
+              <div class="col-md-6">
+                <label for="password">Password</label>
+                <input class="form-control" id="password" name="password" type="password" placeholder="Password">
+              </div>
+              <div class="col-md-6">
+                <label for="exampleConfirmPassword">Ripeti password</label>
+                <input class="form-control" id="exampleConfirmPassword" type="password" placeholder="Ripeti password">
+              </div>
+            </div>
+          </div>
+          <input type="submit" value="Registra" class="btn btn-primary btn-block" />
+        </form>
+        <div class="text-center">
+          <a class="d-block small mt-3" href="/log/in">Vai al login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Bootstrap core JavaScript-->
+  <script src="javascripts/jquery.min.js"></script>
+  <script src="javascripts/bootstrap.bundle.min.js"></script>
+  <!-- Core plugin JavaScript-->
+  <script src="javascripts/jquery.easing.min.js"></script>
+  <script src="javascripts/sb-admin.min.js"></script>
+</body>
+
+</html>

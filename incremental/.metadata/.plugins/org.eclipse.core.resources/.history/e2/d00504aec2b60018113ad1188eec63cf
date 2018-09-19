@@ -1,0 +1,467 @@
+System cleaningRobotProg 
+
+Event consoleCmd : consoleCmd( CMD )
+Event timeEvent : timeEvent( VALUE ) // VALUE is an integer between 0 and 23
+Event tempEvent : tempEvent( VALUE ) // VALUE is measured in Celsius degrees
+Event ledEvent : ledEvent( VALUE ) // VALUE is 'blink' or 'off'
+Event manageCommandsEvent : manageCommands(SENDER, DATA ) 
+Event robotEvent : robotCmd( SENDER, CMD )
+
+
+Dispatch directionReceived : directionReceived( CODE )
+Dispatch thinkingRequestReceived : thinkingRequestReceived( CODE )
+
+Dispatch robotCmd : robotCmd( SENDER, CMD ) // CMD can be: 'w' to go forward, 's' to go backward, 
+								 //'a' to turn left, 'd' to turn right, 
+								 // and 'x' to stop
+Dispatch robotAnswer : robotAnswer( VALUE ) // VALUE can be 'clear', 'obstacle'
+Dispatch thoughtMsg : thought(SENDER, DATA)
+Dispatch thinkingRequestMsg : thinkingRequest(DATA) // DATA = obstacle o clear
+
+//Event robotCmdMid : robotCmdMid( SENDER, DATA )
+Event robotAnswerMid : robotAnswerMid (VALUE)
+
+Event thinkingRequest : thinkingRequest(DATA) // DATA = obstacle o clear
+Event thought : thought(SENDER, DATA) // DATA = qualsiasi comando accettabile dal robot
+Event finished : finished(DATA) // DATA = motivazione per cui l'algoritmo ha terminato la sua esecuzione = stanza pulita o ostacolo invalicabile
+
+Dispatch consoleMsg : consoleCmd( CMD )
+Dispatch timeMsg : timeEvent( VALUE )
+Dispatch tempMsg : tempEvent( VALUE )
+Event manageCommandsMsg : manageCommands(SENDER, DATA ) 
+
+pubSubServer "tcp://localhost:1883"
+	 
+Context progCtx ip [ host="localhost"  port=8019 ] -g cyan
+
+EventHandler evhconsole for consoleCmd {
+ 	forwardEvent qabusinesslogicproban -m consoleMsg  	//from event to message     	
+};
+
+EventHandler evhtime for timeEvent {
+ 	forwardEvent qabusinesslogicproban -m timeMsg  	//from event to message     	
+};
+
+EventHandler evhtemp for tempEvent {
+ 	forwardEvent qabusinesslogicproban -m tempMsg  	//from event to message     	
+};
+
+EventHandler evhthought for thought {
+ 	forwardEvent qabusinesslogicproban -m thoughtMsg 	//from event to message     	
+};
+
+EventHandler evhthinkingrequest for thinkingRequest {
+ 	forwardEvent qamindofrobotproban -m thinkingRequestMsg 	//from event to message     	
+};
+
+EventHandler evhcommands for manageCommandsEvent {
+ 	forwardEvent qafrontend -m manageCommandsMsg 	//from event to message     	
+};
+
+QActor qahuelampemulatoractivator context progCtx {
+	Plan init normal [
+		println("ACTIVATING HUELAMP EMULATOR");
+		delay 1000;
+		javaRun it.unibo.hue.gui.gui.startGui() // CRASHES: why?
+	]
+}
+
+QActor qafrontendactivator context progCtx {
+	Plan init normal [
+		println("ACTIVATING CONSOLE SERVER");
+		delay 1000;
+		// Setting mode to production hides simulator in frontend
+		// To make sure it works in debug mode ( ), cityInformation server must not be executed
+		nodeOp "./nodeCode/console/bin/www --mode debug --qaPo 8019 --qaAddr localhost --mqttProto tcp --mqttPort 1883 --mqttAddr localhost"
+	]
+}
+
+QActor qafrontend context progCtx {
+	Plan init normal [
+	] switchTo waitForCommands
+	
+	Plan waitForCommands [
+	] transition stopAfter 30000000  
+     	whenEvent manageCommandsMsg -> handleManageCommandsMsg
+    finally repeatPlan
+    
+    Plan handleManageCommandsMsg resumeLastPlan [
+    	onMsg manageCommandsMsg : manageCommands("buslog", DATA ) -> 
+    		sendToExternalServer "qaconsoleproban_ctrl" -m DATA
+    ]
+}
+
+QActor qabusinesslogicproban context progCtx {
+	Rules {				
+		systemmodel( name(application), value(off) ).
+		switchSystemState(on) :-
+			systemmodel( name(application), value(off) ),
+			replaceRule( systemmodel( NAME, value(off) ), systemmodel( NAME, value(on) ) ), !.
+		switchSystemState(off) :-
+			systemmodel( name(application), value(on) ),
+			replaceRule( systemmodel( NAME, value(on) ), systemmodel( NAME, value(off) ) ), !.
+		
+		eval(ge, X, X).
+		eval(ge, X, V) :- eval(gt, X, V).
+		
+		curTemperatureValue(10).
+		curTimeValue(7).
+		
+		evalTemperature(cold) :-
+			curTemperatureValue(V),
+			eval(lt, V, 25).
+		evalTemperature(hot) :-
+			curTemperatureValue(V),
+			eval(ge, V, 25), !.
+			
+		evalTime(good) :-
+			curTimeValue(V),
+			output(curTimeValue(V)),
+			eval(ge, V, 7),
+			eval(lt, V, 11), !.		
+	} // was 25 temp 11 time
+	
+	Plan init normal [
+		println( qabusinesslogicreqan(starts)  );
+		connectAsSubscriber "temperature" ;
+		connectAsSubscriber "hour"
+		// All'inizio, il robot e' fermo (stopped) e la console pu� quindi solo avviarlo,
+		// di conseguenza, l'unico messaggio che potr� arrivare in waitForUserCmd sar� consoleCmd('start')
+		// Bisogna quindi disabilitare il comando di stop
+	] switchTo waitForFrontendActivation
+	
+	Plan waitForFrontendActivation[
+    	
+    	println("Waiting for frontend to be ready")
+    ] 
+    transition stopAfter 30000000  
+     	whenMsg consoleMsg -> handleConsoleReady
+    finally repeatPlan
+    
+    Plan handleConsoleReady [   
+     	println('console is ready')
+    ] switchTo waitForUserCmd
+ 
+    Plan waitForUserCmd[    	
+    	println("Waiting for user commands")
+    ] 
+    transition stopAfter 30000000  
+     	whenMsg consoleMsg -> handleConsoleStartCmd,
+     	whenMsg timeMsg -> handleCityMsg,
+     	whenMsg tempMsg -> handleCityMsg
+    finally repeatPlan
+    
+    Plan handleConsoleStartCmd [   
+     	printCurrentEvent;  
+    	onMsg consoleMsg : consoleCmd('start') -> {
+    				println("START command received from console");
+    				addRule rStart; // TEST PURPOSES
+    				
+    				emit manageCommandsEvent : manageCommands("buslog", "disable_start, enable_stop");
+    				emit ledEvent : ledEvent('blink');
+    				emit thinkingRequest : thinkingRequest('reset')
+
+    				// Adesso, il robot e' in movimento, di conseguenza bisogna abilitare il comando di stop
+    				// e disabilitare il comando di start. 
+    				// Quindi, nel piano waitForAlgCmd, potr� arrivare solo consoleCmd(stop)
+    				
+    				
+    				}
+    ] switchTo waitForAlgCmd
+    
+    Plan waitForAlgCmd[
+    ]
+    transition stopAfter 30000000 
+        whenMsg consoleMsg -> handleStopOrFinished,
+     	whenMsg thoughtMsg : thought(mind, DATA) do {
+     		onMsg thoughtMsg : thought(mind, "finished") ->
+     			emit finished : finished("finishedCleaning");
+     		onMsg thoughtMsg : thought(mind, "cantfinish") ->
+     			emit finished : finished("cantFinish");
+     		onMsg thoughtMsg : thought(mind, "error") ->
+     			emit finished : finished("cantFinish");
+     		onMsg thoughtMsg : thought(mind, DATA) ->
+     			forward qasoffrittirobot -m robotCmd : robotCmd("buslog", DATA )},
+     	whenMsg directionReceived -> waitForRobotResponse,
+     	whenMsg robotAnswer -> handleRobotAnswer,
+     	whenEvent finished -> handleStopOrFinished,
+     	whenMsg timeMsg -> handleCityMsg,
+     	whenMsg tempMsg -> handleCityMsg
+    finally repeatPlan
+    
+    Plan waitForRobotResponse[ ] 
+    transition stopAfter 30000000 
+        whenMsg consoleMsg -> handleStopOrFinished,
+     	whenMsg robotAnswer -> handleRobotAnswer,
+     	whenMsg thinkingRequestReceived -> waitForAlgCmd,
+     	whenMsg timeMsg -> handleCityMsg,
+     	whenMsg tempMsg -> handleCityMsg
+    finally repeatPlan
+    
+    Plan handleRobotAnswer [   
+     	
+     	onMsg robotAnswer : robotAnswer('obstacle') -> {
+     			println("ROBOT TO BUSINESS LOGIC: C'� un ostacolo.");
+     			emit thinkingRequest : thinkingRequest('obstacle' )
+     	};
+     	onMsg robotAnswer : robotAnswer('clear') -> {
+     			println("ROBOT TO BUSINESS LOGIC: Il campo � libero.");
+     			emit thinkingRequest : thinkingRequest('clear')
+     	}
+     		
+    ] switchTo waitForAlgCmd
+    
+    Plan handleStopOrFinished [ 
+    	onEvent finished : finished("finishedCleaning") -> {
+    		println("BUSINESS LOGIC: The floor is clean, stopping");
+    		addRule rEnd
+    	}
+    	onEvent finished : finished("cantFinish") -> println("BUSINESS LOGIC: couldn't finish because of obstacle or error");
+    	println("STOP command received from console or triggered from application");
+    	addRule rStop; // TEST PURPOSES
+    	emit ledEvent : ledEvent('off');
+    	[!? systemmodel( name(application), value(on) )] {
+    		emit manageCommandsEvent : manageCommands("buslog", "enable_start, disable_stop")
+    	}
+    ] switchTo waitForUserCmd
+    
+    Plan handleCityMsg resumeLastPlan [
+    	printCurrentMessage;
+    	onMsg timeMsg : timeEvent(V) -> ReplaceRule curTimeValue(X) with curTimeValue(V);
+    	onMsg tempMsg : tempEvent(V) -> ReplaceRule curTemperatureValue(X) with curTemperatureValue(V);
+    	[!? evalTime(good)] {
+    		println("GOOD time range, doing nothing.");
+    		[!? evalTemperature(cold)] {
+				println("Temperature is nice, doing nothing.");
+				addRule rTempAndTimeOk; // TEST PURPOSES
+				[!? switchSystemState(on) ] {
+					emit manageCommandsEvent : manageCommands("buslog", "enable_start, disable_stop")
+				}
+			} else {
+				println("Temperature too hot, stopping everything.");
+				addRule rTempKo; // TEST PURPOSES
+				[!? switchSystemState(off) ] {
+					emit manageCommandsEvent : manageCommands("buslog", "disable_all")
+				}
+			}
+		} else {
+			println("BAD time range, stopping everything.");
+			addRule rTimeKo; // TEST PURPOSES
+			[!? switchSystemState(off) ] {
+				emit manageCommandsEvent : manageCommands("buslog", "disable_all")
+			} 
+		}
+    ] switchTo [!? systemmodel( name(application), value(off) )] handleStopOrFinished
+        
+}
+
+QActor qamindofrobotproban context progCtx {
+	Plan init normal [
+		println( qaconsoleproban(starts)  )
+	] switchTo waitForThinkingRequest
+		
+	Plan waitForThinkingRequest [
+		println( "MIND: waitForThinkingRequest")
+	] transition stopAfter 300000
+     	whenMsg thinkingRequestMsg -> handleThinking
+    finally repeatPlan
+    
+    Plan handleThinking resumeLastPlan [
+    	println( "MIND: handleThinking");
+    	onMsg thinkingRequestMsg : thinkingRequest('reset') -> {
+    		println("ThinkingRequest received: reset");
+    		actorOp getNextMove(clear);
+    		[ ?? actorOpDone( OP, R ) ] {
+	    		emit thought : thought(mind, R);
+	    		forward qabusinesslogicproban -m thinkingRequestReceived : thinkingRequestReceived(ok);
+	    		println("MIND: Thought!")
+    		}
+    	};
+    	onMsg thinkingRequestMsg : thinkingRequest('obstacle') -> {
+    		println("ThinkingRequest received: obstacle");
+    		actorOp getNextMove(obstacle);
+    		[ ?? actorOpDone( OP, R ) ] {
+	    		emit thought : thought(mind, R);
+	    		forward qabusinesslogicproban -m thinkingRequestReceived : thinkingRequestReceived(ok);
+	    		println("MIND: Thought!")
+    		}
+    	};
+    	onMsg thinkingRequestMsg : thinkingRequest('clear') -> {
+    		println("ThinkingRequest received: clear");
+    		actorOp getNextMove(clear);
+    		[ ?? actorOpDone( OP, R ) ] {
+    			emit thought : thought(mind, R);
+    			forward qabusinesslogicproban -m thinkingRequestReceived : thinkingRequestReceived(ok);
+    			println("MIND: Thought!")
+    		}
+    	}
+ 
+    	/*delay 1000 ;
+    	 actorOp getTestString;
+    	[ ?? actorOpDone( OP, R ) ] {
+    		emit thought : thought(mind, R)
+    	//println(bum)
+    	};
+    	//emit thought : thought(mind, "data(w, 300)");*/
+    	
+    	
+    	// Ad un certo punto potr� essere emesso l'evento finished, quando la destinazione � stata raggiunta
+    ]
+    
+}
+
+QActor qaledproban context progCtx {
+	
+	Rules {
+		ledmodel( name(genericled), value(off) ).
+		switchLedValue(on) :-
+			ledmodel( name(genericled), value(off) ),
+			replaceRule( ledmodel( NAME, value(off) ), ledmodel( NAME, value(on) ) ), !.
+		switchLedValue(off) :-
+			replaceRule( ledmodel( NAME, value(on) ), ledmodel( NAME, value(off) ) ), !.
+	}
+	
+	Plan init normal [
+		println( qaledproban(starts)  )
+	] switchTo waitForCommand     
+  
+    Plan waitForCommand[  ]  
+    transition stopAfter 100000 
+     	whenEvent ledEvent -> handleLed
+    finally repeatPlan	
+    
+    Plan handleLed resumeLastPlan [   
+     	//printCurrentEvent;  
+    	
+    	onEvent ledEvent : ledEvent('blink') -> { 
+    		addRule rBlinkLed; // TEST PURPOSES
+    		[!? switchLedValue(on)] println("LED: blinking!") };
+    				 
+    	onEvent ledEvent : ledEvent('off') -> {
+    		addRule rStop; // TEST PURPOSES
+    		[!? switchLedValue(off)] println("LED: not blinking...")}
+    ]
+}
+
+QActor qahuelamp context progCtx {
+	
+	Rules {
+		ledmodel( name(huelamp), value(off) ).
+		switchLedValue(on) :-
+			ledmodel( name(huelamp), value(off) ),
+			replaceRule( ledmodel( NAME, value(off) ), ledmodel( NAME, value(on) ) ), !.
+		switchLedValue(off) :-
+			replaceRule( ledmodel( NAME, value(on) ), ledmodel( NAME, value(off) ) ), !.
+	}
+	
+	Plan init normal [
+		println( qahuelamp(starts)  )
+	] switchTo waitForCommand     
+  
+    Plan waitForCommand[  ]  
+    transition stopAfter 100000 
+     	whenEvent ledEvent -> handleLed
+    finally repeatPlan	
+    
+    Plan handleLed resumeLastPlan [   
+     	//printCurrentEvent;  
+    	
+    	onEvent ledEvent : ledEvent('blink') -> {
+    		addRule rBlinkHue; // TEST PURPOSES
+    		[!? switchLedValue(on)] javaRun it.unibo.hue.components.hueClientSpecific.blink() };
+    				 
+    	onEvent ledEvent : ledEvent('off') -> {
+    		addRule rStop; // TEST PURPOSES
+    		[!? switchLedValue(off)] javaRun it.unibo.hue.components.hueClientSpecific.off()}
+    ]
+}
+
+QActor qarobotproban context progCtx {
+	Plan init normal [
+		println( qarobotproban(starts)  )
+	] switchTo waitForCommand     
+  
+    Plan waitForCommand[  ]  
+    transition stopAfter 100000 
+        whenEvent robotEvent -> handleCmd, // for testing purposes
+     	whenMsg robotCmd -> handleCmd 
+    
+     Plan handleCmd [  
+     	addRule rFloorClean; 
+     	println("ROBOT: command received!");
+     	//printCurrentMessage;  
+    	onMsg robotCmd : robotCmd("buslog", 'w') -> 
+    				println("ROBOT: Moving forward!");
+    	onMsg robotCmd : robotCmd("buslog", 's') -> 
+    				println("ROBOT: Moving backward!");
+    	onMsg robotCmd : robotCmd("buslog", 'a') ->  
+    				println("ROBOT: Turning left!");
+    	onMsg robotCmd : robotCmd("buslog", 'd') -> 
+    				println("ROBOT: Turning right!");
+    	onMsg robotCmd : robotCmd("buslog", 'x') -> 
+    				println("ROBOT: Stopping!")
+    ] switchTo robotResponse
+    
+    
+    Plan robotResponse [
+    	println("ROBOT: let's see what's in front of me...");
+    	forward qabusinesslogicproban -m robotAnswer : robotAnswer('clear');
+    	println("ROBOT: answer sent: clear!")
+    ] switchTo waitForCommand
+}
+
+// AGGIUNTA PER SOFFRITTI
+QActor qasoffrittirobot context progCtx {
+	Plan init normal [
+		println( qasoffrittirobot(starts)  )
+	] switchTo waitForFrontendActivation
+	
+	Plan waitForFrontendActivation[
+    	
+    	println("Waiting for robot to be ready")
+    ] 
+    transition stopAfter 30000000  
+     	whenEvent robotAnswerMid -> waitForCommand  
+    finally repeatPlan   
+  
+    Plan waitForCommand[ 
+    	println("Robot is ready")
+    	
+    ]  
+    transition stopAfter 100000 
+     	whenMsg robotCmd -> handleCmd
+    
+     Plan handleCmd [   
+     	println("ROBOT SOFFRITTI: Plan handleCmd");
+     	printCurrentMessage;  
+    	onMsg robotCmd : robotCmd(buslog, V) -> 
+    		sendToExternalServer "qamiddleware_ctrl" -m V;
+    	forward qabusinesslogicproban -m directionReceived : directionReceived(ok)
+    ] switchTo waitForRobotResponse
+    
+    
+    Plan waitForRobotResponse [
+    	println("ROBOT SOFFRITTI: let's see what's in front of me...") // Qui sembra fermarsi non appena si avvia secondpart
+    ] transition stopAfter 100000 
+     	whenEvent robotAnswerMid -> robotResponse
+     	
+     Plan robotResponse [
+     	onEvent robotAnswerMid : robotAnswerMid('clear') -> {
+     			println("Il campo � libero, informo la business logic.");
+     			forward qabusinesslogicproban -m robotAnswer : robotAnswer('clear')
+     		};
+     	onEvent robotAnswerMid : robotAnswerMid('obstacle') -> {
+     			println("C'� un ostacolo, informo la business logic.");
+     			forward qabusinesslogicproban -m robotAnswer : robotAnswer('obstacle')
+     		}
+     	
+     ] switchTo waitForCommand
+}
+
+QActor qacityinformationproban context progCtx {
+	Plan init normal [
+		println("ACTIVATING CITY SERVER")
+		// Se si eseguono i test, commentare la riga sotto
+		// nodeOp "./nodeCode/cityInformation/server.js -c Bologna --pr tcp --a localhost --po 1883 -o"
+	]
+}

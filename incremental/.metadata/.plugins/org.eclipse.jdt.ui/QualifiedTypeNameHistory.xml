@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="it.unibo.consoleCtx.MainConsoleCtx"/>
+<fullyQualifiedTypeName name="it.unibo.robotCtx.MainRobotCtx"/>
+<fullyQualifiedTypeName name="it.unibo.qactors.QActorUtils"/>
+<fullyQualifiedTypeName name="it.unibo.qactors.QActorContext"/>
+<fullyQualifiedTypeName name="it.unibo.qactors.akka.SenderObject"/>
+<fullyQualifiedTypeName name="java.util.List"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="java.util.Set"/>
+<fullyQualifiedTypeName name="java.util.HashSet"/>
+</qualifiedTypeNameHistroy>

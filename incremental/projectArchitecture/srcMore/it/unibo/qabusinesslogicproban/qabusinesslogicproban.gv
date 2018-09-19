@@ -1,0 +1,52 @@
+/*
+*
+* A GraphViz DOT FSM description 
+* Please use a GraphViz visualizer (like http://www.webgraphviz.com)
+*  
+*/
+
+digraph finite_state_machine {
+	rankdir=LR
+	size="8,5"
+	
+	init [ color = red ][ fontcolor = red ][ penwidth = 3 ]
+	handleCityMsg [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	waitForAlgCmd [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	handleThought [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	handleStopOrFinished [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	handleConsoleStartCmd [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	waitForFrontendActivation [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	waitForUserCmd [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	handleConsoleReady [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	handleRobotAnswer [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	waitForRobotResponse [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	
+	waitForAlgCmd -> waitForAlgCmd [ label = "repeat "][ style = dashed ][ color = blue ][ fontcolor = blue ]
+	waitForRobotResponse -> handleToutBuiltIn [ label = "timeout(30000000)" ][ color = green ][ fontcolor = green ]
+	waitForUserCmd -> handleConsoleStartCmd [ label = "consoleMsg" ][ color = black ][ fontcolor = black ]
+	handleThought -> waitForRobotResponse [ label = "switch" ][ color = black ][ fontcolor = black ]
+	waitForRobotResponse -> handleCityMsg [ label = "tempMsg" ][ color = red ][ fontcolor = red ][ dir = both ]
+	waitForFrontendActivation -> handleConsoleReady [ label = "consoleMsg" ][ color = black ][ fontcolor = black ]
+	waitForRobotResponse -> handleCityMsg [ label = "timeMsg" ][ color = red ][ fontcolor = red ][ dir = both ]
+	waitForAlgCmd -> handleCityMsg [ label = "tempMsg" ][ color = red ][ fontcolor = red ][ dir = both ]
+	waitForUserCmd -> handleToutBuiltIn [ label = "timeout(30000000)" ][ color = green ][ fontcolor = green ]
+	handleRobotAnswer -> waitForAlgCmd [ label = "switch" ][ color = black ][ fontcolor = black ]
+	waitForUserCmd -> handleCityMsg [ label = "timeMsg" ][ color = red ][ fontcolor = red ][ dir = both ]
+	handleConsoleStartCmd -> waitForAlgCmd [ label = "switch" ][ color = black ][ fontcolor = black ]
+	waitForRobotResponse -> handleRobotAnswer [ label = "robotAnswer" ][ color = black ][ fontcolor = black ]
+	handleConsoleReady -> waitForUserCmd [ label = "switch" ][ color = black ][ fontcolor = black ]
+	waitForAlgCmd -> handleToutBuiltIn [ label = "timeout(30000000)" ][ color = green ][ fontcolor = green ]
+	waitForAlgCmd -> handleCityMsg [ label = "timeMsg" ][ color = red ][ fontcolor = red ][ dir = both ]
+	waitForUserCmd -> waitForUserCmd [ label = "repeat "][ style = dashed ][ color = blue ][ fontcolor = blue ]
+	waitForRobotResponse -> waitForRobotResponse [ label = "repeat "][ style = dashed ][ color = blue ][ fontcolor = blue ]
+	init -> waitForFrontendActivation [ label = "switch" ][ color = black ][ fontcolor = black ]
+	waitForUserCmd -> handleCityMsg [ label = "tempMsg" ][ color = red ][ fontcolor = red ][ dir = both ]
+	handleCityMsg -> handleStopOrFinished [ label = "[ !? systemmodel(name(application),value(off)) ], switch" ][ color = black ][ fontcolor = black ]
+	handleStopOrFinished -> waitForUserCmd [ label = "switch" ][ color = black ][ fontcolor = black ]
+	waitForRobotResponse -> handleStopOrFinished [ label = "consoleMsg" ][ color = black ][ fontcolor = black ]
+	waitForFrontendActivation -> handleToutBuiltIn [ label = "timeout(30000000)" ][ color = green ][ fontcolor = green ]
+	waitForAlgCmd -> handleThought [ label = "thought" ][ color = black ][ fontcolor = black ]
+	waitForAlgCmd -> handleStopOrFinished [ label = "finished" ][ color = black ][ fontcolor = black ]
+	waitForFrontendActivation -> waitForFrontendActivation [ label = "repeat "][ style = dashed ][ color = blue ][ fontcolor = blue ]
+	waitForAlgCmd -> handleStopOrFinished [ label = "consoleMsg" ][ color = black ][ fontcolor = black ]
+}

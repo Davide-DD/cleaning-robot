@@ -1,0 +1,152 @@
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import alice.tuprolog.SolveInfo;
+import it.unibo.consoleCtx.MainConsoleCtx;
+import it.unibo.qactors.QActorContext;
+import it.unibo.qactors.QActorUtils;
+import it.unibo.qactors.akka.QActor;
+import it.unibo.robotCtx.MainRobotCtx;
+
+public class FirstTest {
+
+	private QActorContext robotCtx, consoleCtx;
+	private QActor robot = null, console = null;
+
+	protected void getActors() { 
+		try {
+			System.out.println("waitForActors ... " ); 
+			
+			while(robot == null || console == null) {
+				
+				Thread.sleep(250);
+				
+			}
+		} catch( Exception e) {
+			System.out.println("waitForActors fails " + e.getMessage() ); 
+		}
+	}
+	
+	@Before
+	public void systemSetUp() throws Exception	{
+		System.out.println("systemSetUp starts " );
+		Runnable robotRun = new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				try {
+					MainRobotCtx.initTheContext();
+					while(robot == null) {
+						
+						Thread.sleep(250);
+										
+						robot = QActorUtils.getQActor("qarobot_ctrl");
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}	
+		};
+		Runnable consoleRun = new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				try {
+					MainConsoleCtx.initTheContext();
+					while(console == null) {
+						
+						Thread.sleep(250);
+										
+						console = QActorUtils.getQActor("qaconsole_ctrl");
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}	
+		};
+		Thread consoleThread = new Thread(consoleRun);
+		consoleThread.start();
+		
+		Thread robotThread = new Thread(robotRun);
+		robotThread.start();
+		
+		getActors();
+	}
+
+	@After
+	public void terminate()	{
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("====== terminate " ); 
+	}
+	
+	/**
+	 *  R-Start: il robot deve iniziare la pulizia della stanza quando viene premuto start.
+	 *  Dato che al punto precedente si e' verificato che a ogni mossa dell'algoritmo corrisponde un'effettiva mossa del robot,
+	 *  basterà verificare che la business logic, che sceglie le mosse, abbia ricevuto il comando di start,
+	 *  che nel modello coincide con la messa in moto dell'intelligenza artificiale che decide le mosse
+	 *  QActor: business logic
+	 *  
+	 *  R-BlinkLed: appena ricevuto il comando di start, per come e' strutturato il sistema, basta vedere se lo stato del led diventa lampeggiante
+	 *  QActor: led
+	 *  
+	 *  R-BlinkHue: come sopra ma per la hue
+	 *  QActor: hue
+	 *  
+	 *  Le precondizioni di questi eventi coincidono, quindi verranno trattati tutti qui sotto
+	 *  
+	 *  TODO: serve un predicato Prolog che la business logic deve settare per indicare che il comando di start e' stato ricevuto 
+	 *  		(per indicare se la pulizia e' in corso o e' fermo)
+	 */  
+	@Test
+	public void rStart() {
+		System.out.println("====== rStart ===============" ); 
+		try {
+			console.sendMsg("qaconsole_ctrl", "1", "qarobot_ctrl", "consoleMsg", "consoleMsg(start)");
+			
+			Thread.sleep(1000);
+			
+			SolveInfo sol = robot.solveGoal("rStart");
+			assertTrue("", sol.isSuccess());
+			
+		} catch (Exception e) {
+			System.out.println( "ERROR=" + e.getMessage() ); fail("actorTest " + e.getMessage() );
+		}
+	}
+	
+	/**
+	 * 	R-Stop: come per lo start, lo stop e' permesso solo quando il robot sta effettivamente pulendo.
+	 *  Di conseguenza, basta semplicemente verificare che lo stato del sistema (che e' stato gia' verificato attivarsi con successo con R-Start),
+	 *  cambi in stoppato.
+	 *  I led pero' continueranno a lampeggiare: bisogna quindi controllare che anch'essi si spengano
+	 *  QActor: business logic, led, hue
+	 *  
+	 *  TODO: serve lo stesso predicato Prolog di cui parlavo a rStart
+	 */
+	@Test
+	public void rStop() {
+		System.out.println("====== rStop ===============" ); 
+		try {
+			console.sendMsg("qaconsole_ctrl", "2", "qarobot_ctrl", "consoleMsg", "consoleMsg(stop)");
+			
+			Thread.sleep(1000);
+
+			SolveInfo sol = robot.solveGoal("rStop");
+			assertTrue("", sol.isSuccess());
+		
+		} catch (Exception e) {
+			System.out.println( "ERROR=" + e.getMessage() ); fail("actorTest " + e.getMessage() );
+		}
+	}
+	
+}
