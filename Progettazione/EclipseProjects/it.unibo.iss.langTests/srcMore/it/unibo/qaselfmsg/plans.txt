@@ -1,6 +1,0 @@
-plan(1,init, sentence(true,move(print("Test per i selfMsg, ci si prova")),'','' ))
-plan(1,handleFinished, sentence(true,eventswitch(finished, »finished( "cantFinish"), move(print("Terminato a causa di ostacolo invalicabile")) ),'','' ))
-plan(2,handleFinished, sentence(true,eventswitch(finished, »finished( "finishedCleaning"), move(print("Terminato per stanza pulita correttamente")) ),'','' ))
-plan(3,handleFinished, sentence(true,move(print("Test concluso con successo")),'','' ))
-plan(4,handleFinished, sentence(true,delay( 2000) ,'','' ))
-plan(5,handleFinished, sentence(true,move(resumeplan),'','' ))

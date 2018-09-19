@@ -1,4 +1,0 @@
-plan(1,init, sentence(true,delay( 2000) ,'','' ))
-plan(2,init, sentence(true,forward(qaselfmsg, thoughtMsg,thought( mind,data( sorbetti))),'','' ))
-plan(3,init, sentence(true,delay( 2000) ,'','' ))
-plan(4,init, sentence(true,forward(qaselfmsg, thoughtMsg,thought( mind,"error")),'','' ))

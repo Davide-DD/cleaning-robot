@@ -1,7 +1,0 @@
-plan(1,init, sentence(true,move(print("ROBOT: in attesa di comandi dalla console o eventi di interruzione")),'','' ))
-plan(1,handleConsoleMsg, sentence(true,msgswitch(consoleMsg, consoleMsg( "start") , not here StateMoveNormal),'','' ))
-plan(2,handleConsoleMsg, sentence(true,msgswitch(consoleMsg, consoleMsg( "stop") , not here StateMoveNormal),'','' ))
-plan(3,handleConsoleMsg, sentence(true,move(resumeplan),'','' ))
-plan(1,handleEnvironmentalEvent, sentence(true,eventswitch(environmentalEvent, Â»environmentalEvent( "bad_temp"), not here StateMoveNormal ),'','' ))
-plan(2,handleEnvironmentalEvent, sentence(true,eventswitch(environmentalEvent, Â»environmentalEvent( "bad_time"), not here StateMoveNormal ),'','' ))
-plan(3,handleEnvironmentalEvent, sentence(true,move(resumeplan),'','' ))

@@ -1,3 +1,0 @@
-plan(1,init, sentence(true,move(print("ACTIVATING CONSOLE SERVER")),'','' ))
-plan(2,init, sentence(true,delay( 1000) ,'','' ))
-plan(3,init, sentence(true,not here StateMoveNormal,'','' ))

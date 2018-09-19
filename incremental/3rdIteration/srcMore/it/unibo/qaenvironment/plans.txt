@@ -1,3 +1,0 @@
-plan(1,init, sentence(true,move(print("ENVIRONMENT: simulo controllo di tempo e temperatura e invio eventi di interruzione a causa di violazione delle precondizioni")),'','' ))
-plan(2,init, sentence(true,delay( 5000) ,'','' ))
-plan(3,init, sentence(true,raise( environmentalEvent , environmentalEvent( "bad_temp") )'),'','' ))

@@ -1,1 +1,0 @@
-INDEX VERSION 1.130+/Users/davidedidonato/Documents/incremental/.metadata/.plugins/org.eclipse.jdt.core

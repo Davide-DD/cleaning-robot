@@ -1,5 +1,0 @@
-plan(1,init, sentence(true,move(print(qaappl( starts))),'','' ))
-plan(2,init, sentence(true,delay( 1000) ,'','' ))
-plan(3,init, sentence(true,raise( applEvent , applEvent( START) )'),'','' ))
-plan(4,init, sentence(true,delay( 7000) ,'','' ))
-plan(5,init, sentence(true,raise( applEvent , applEvent( STOP) )'),'','' ))

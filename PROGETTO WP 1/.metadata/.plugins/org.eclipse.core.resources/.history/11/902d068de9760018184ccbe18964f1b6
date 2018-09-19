@@ -1,5 +1,0 @@
-plan(1,init, sentence(true,move(print(qarobot( starts))),'','' ))
-plan(1,handleCmd, sentence(true,printCurrentEvent(false),'','' ))
-plan(2,handleCmd, sentence(true,eventswitch(applEvent, »applEvent( START), move(print("Moving!")) ),'','' ))
-plan(3,handleCmd, sentence(true,eventswitch(applEvent, »applEvent( STOP), move(print("Stopping!")) ),'','' ))
-plan(4,handleCmd, sentence(true,move(resumeplan),'','' ))

@@ -1,4 +1,0 @@
-plan(1,init, sentence(true,move(print(qaledproban( starts))),'','' ))
-plan(1,handleLed, sentence(true,eventswitch(ledEvent, Â»ledEvent( "blink"), not here StateMoveNormal ),'','' ))
-plan(2,handleLed, sentence(true,eventswitch(ledEvent, Â»ledEvent( "off"), not here StateMoveNormal ),'','' ))
-plan(3,handleLed, sentence(true,move(resumeplan),'','' ))

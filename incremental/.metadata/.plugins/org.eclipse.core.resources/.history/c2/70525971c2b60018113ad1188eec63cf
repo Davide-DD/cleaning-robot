@@ -1,7 +1,0 @@
-plan(1,init, sentence(true,move(print(qaconsoleproban( starts))),'','' ))
-plan(1,waitForThinkingRequest, sentence(true,move(print("MIND: waitForThinkingRequest")),'','' ))
-plan(1,handleThinking, sentence(true,move(print("MIND: handleThinking")),'','' ))
-plan(2,handleThinking, sentence(true,delay( 1000) ,'','' ))
-plan(3,handleThinking, sentence(true,raise( thought , thought( "w") )'),'','' ))
-plan(4,handleThinking, sentence(true,move(print("MIND: Thought!")),'','' ))
-plan(5,handleThinking, sentence(true,move(resumeplan),'','' ))
