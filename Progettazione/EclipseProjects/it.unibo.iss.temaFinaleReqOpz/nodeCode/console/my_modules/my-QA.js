@@ -12,7 +12,6 @@ module.exports.init = (host, qaport) => {
         qaanswer = qaanswer + data;
         if (qaanswer === "") return;
         if (data.includes("\n")) {
-        	console.log('receivedQaEvent mmsg=' + qaanswer);
             var temp = qaanswer.substring(qaanswer.indexOf(",") + 1);
             temp = temp.substring(0, temp.indexOf(')'));
             if (temp.indexOf(',') !== -1) temp = temp.substring(1, temp.lastIndexOf('\''));
@@ -22,6 +21,6 @@ module.exports.init = (host, qaport) => {
     });
 };
 
-module.exports.sendEvent = (payload) => {
-    qaComm.emitQaEvent(qa, msgNum, payload);
+module.exports.sendEvent = (eventType, payload) => {
+    qaComm.emitQaEvent(qa, eventType, msgNum, payload);
 };

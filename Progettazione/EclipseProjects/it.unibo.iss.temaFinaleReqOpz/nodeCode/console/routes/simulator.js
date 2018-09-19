@@ -7,5 +7,6 @@ router.get('', setupPassport.ensureAuthenticated, function(req, res, next) {
 });
 
 router.use('/change', require('./change'));
+router.use('/delete', require('./delete'));
 
 module.exports = router;

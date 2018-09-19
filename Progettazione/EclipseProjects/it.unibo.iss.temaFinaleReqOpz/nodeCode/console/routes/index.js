@@ -9,7 +9,7 @@ router.get("/", function(req, res, next) {
 });
 
 router.get('/commands/:command', setupPassport.ensureAuthenticated, function (req, res, next) {
-	myQA.sendEvent(req.params.command);
+	myQA.sendEvent("consoleCmd", req.params.command);
 	res.sendStatus(200);
 });
 

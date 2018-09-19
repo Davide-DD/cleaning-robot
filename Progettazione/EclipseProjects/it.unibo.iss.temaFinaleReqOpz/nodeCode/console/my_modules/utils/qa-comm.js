@@ -8,7 +8,7 @@ module.exports.connectToQaNode = (host, qaport) => {
 		console.log('connected to qa node:' + host + ":" + qaport);
 
 		// Send a ready event to the QActor application, unless it won't work if you want to communicate first
-		emitQaEvent(socketToQaCtx, 0, 'ready');
+		emitQaEvent(socketToQaCtx, 'consoleCmd', 0, 'ready');
 
 		return socketToQaCtx;
 
@@ -20,9 +20,9 @@ module.exports.connectToQaNode = (host, qaport) => {
 /*
  * emit an event for the QActor application
  */
-var emitQaEvent = (qa, msgNum, payload) => {
+var emitQaEvent = (qa, eventType, msgNum, payload) => {
 	try {
-		var msg = "msg(consoleCmd,event,qaconsoleproban_ctrl,none,consoleCmd(" + payload + ")," + msgNum + ")";
+		var msg = "msg(" + eventType + ",event,qaconsoleproban_ctrl,none," + eventType + "(" + payload + ")," + msgNum + ")";
 		if (qa !== null) {
 			console.log('emitQaEvent mmsg=' + msg);
 			qa.write(msg + "\n");

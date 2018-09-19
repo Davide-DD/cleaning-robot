@@ -41,3 +41,14 @@ $( "#confirmHour" ).click(function() {
 		}
 	});
 });
+
+$( "#deleteMap" ).click(function() {
+	$.ajax({
+		type: 'GET',
+		contentType: 'application/json',
+		url: 'simulator/delete/map',						
+		success: function(data) {
+			alert('Mappa resettata!');
+		}
+	});
+});
