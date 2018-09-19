@@ -120,7 +120,7 @@ QActor qarobot3 context robotCtx3 {
     
     Plan handleCollisionEvent resumeLastPlan [
     	addRule rRobotObstacle;
-    	println("ROBOT: collisione rilevata dal sensore, per capire se � mobile aspetto un po', e se non ricevo pi� collisioni allora lo �");
+    	println("ROBOT: collisione rilevata dal sensore, per capire se è mobile aspetto un po', e se non ricevo più collisioni allora lo è");
     	println("ROBOT: temporaneamente fermo per collisione");
     	delay 700;
     	println("ROBOT: riprendo ad andare, dopo la collisione")
