@@ -57,11 +57,11 @@ public class ServerOpzionale {
 					options[1] = new String("No");
 					int choice = JOptionPane.showOptionDialog(frame.getContentPane(),"Wanna clean with optimal path?","Restarting application...", 0,JOptionPane.INFORMATION_MESSAGE,null,options,null);
 					if (choice==0) {
-					    ppcr.setOptimal(null);
+					    ppcr.setOptimal(null, "");
 					    System.out.println("\nRestarting with optimal cleaning path!");
 					} else {
 						System.out.println("\nRestarting with non optimal cleaning path!");
-						ppcr.setOptimal(null);
+						ppcr.setOptimal(null, "");
 					}
 					
 					//Tempo per aggiornare la pagina localhost (appena scade il tempo, riparte tutto)

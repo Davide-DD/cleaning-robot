@@ -1,11 +1,11 @@
 /*
 ================================================================================
-build_progCtx.gradle
+build_consoleCtx.gradle
 GENERATED ONLY ONCE
 USAGE:	 
-	gradle -b build_progCtx.gradle eclipse		//to set the dependency on the library
-	gradle -b build_progCtx.gradle build
-	gradle -b build_progCtx.gradle cleanDistDir	//to clean the src directory
+	gradle -b build_consoleCtx.gradle eclipse		//to set the dependency on the library
+	gradle -b build_consoleCtx.gradle build
+	gradle -b build_consoleCtx.gradle cleanDistDir	//to clean the src directory
 ================================================================================
 */
 apply plugin: 'java'
@@ -21,7 +21,7 @@ PROPERTIES
 version = "1.0"
 sourceCompatibility = "1.8"
 ext{
-	mainClassName = "it.unibo.progCtx.MainProgCtx"
+	mainClassName = "it.unibo.consoleCtx.MainConsoleCtx"
 }
 /*
 --------------------------------------------------------------
@@ -34,7 +34,7 @@ sourceSets {
 			srcDirs = ['src' , 'src-gen'  ]
 		}
 	}
-	/*test {
+/*	test {
 		 java {
 		   srcDirs = ['test']
 		 }
@@ -56,9 +56,9 @@ BASIC SUPPORT (test, akka)
      // https://mvnrepository.com/artifact/com.typesafe.akka/akka-actor_2.11
 	  compile group: 'com.typesafe.akka', name: 'akka-actor_2.11', version: '2.5.2'
 	 // https://mvnrepository.com/artifact/com.typesafe.akka/akka-remote_2.11
-	 compile group: 'com.typesafe.akka', name: 'akka-remote_2.11', version: '2.5.1'	
+	 compile group: 'com.typesafe.akka', name: 'akka-remote_2.11', version: '2.5.1'
 	 // https://mvnrepository.com/artifact/commons-logging/commons-logging
-	 compile group: 'commons-logging', name: 'commons-logging', version: '1.1.1' 
+	 compile group: 'commons-logging', name: 'commons-logging', version: '1.1.1' 	 
      
 /*
 UNIBO SUPPORTS
@@ -71,7 +71,6 @@ UNIBO SUPPORTS
 	  compile fileTree(dir: '../it.unibo.libs2018/libs/http',  include: 'nanoHTTPD.jar')
 	  compile fileTree(dir: '../it.unibo.libs2018/libs/http',  include: 'httpcore-4.4.1.jar')
 	  compile fileTree(dir: '../it.unibo.libs2018/libs/http',  include: 'httpclient-4.5.jar')
-	  
 /*
 JSON
 */
@@ -158,6 +157,11 @@ task copyInfoForDist << {
 	copy { 
 		from 'srcMore'
 		into 'src/dist/srcMore/'
+		//include '**/*.*'
+ 	}
+ 	copy { 
+		from 'nodeCode'
+		into 'src/dist/nodeCode/'
 		include '**/*.*'
  	}
 	copy { 

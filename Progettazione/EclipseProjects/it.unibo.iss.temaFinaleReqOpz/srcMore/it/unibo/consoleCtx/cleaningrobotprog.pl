@@ -1,5 +1,5 @@
 %====================================================================================
-% Context progCtx  SYSTEM-configuration: file it.unibo.progCtx.cleaningRobotProg.pl 
+% Context consoleCtx  SYSTEM-configuration: file it.unibo.consoleCtx.cleaningRobotProg.pl 
 %====================================================================================
 context(progctx, "localhost",  "TCP", "8019" ).  		 
 context(consolectx, "localhost",  "TCP", "8020" ).  		 
@@ -23,12 +23,7 @@ qactor( qasoffrittirobot_ctrl , progctx, "it.unibo.qasoffrittirobot.Qasoffrittir
 qactor( qacityinformationproban , progctx, "it.unibo.qacityinformationproban.MsgHandle_Qacityinformationproban"   ). %%store msgs 
 qactor( qacityinformationproban_ctrl , progctx, "it.unibo.qacityinformationproban.Qacityinformationproban"   ). %%control-driven 
 %%% -------------------------------------------
-eventhandler(evhdeletemap,progctx,"it.unibo.progCtx.Evhdeletemap","deleteMapCmd").  
-eventhandler(evhconsole,progctx,"it.unibo.progCtx.Evhconsole","consoleCmd").  
-eventhandler(evhtime,progctx,"it.unibo.progCtx.Evhtime","timeEvent").  
-eventhandler(evhtemp,progctx,"it.unibo.progCtx.Evhtemp","tempEvent").  
-eventhandler(evhthought,progctx,"it.unibo.progCtx.Evhthought","thought").  
-eventhandler(evhthinkingrequest,progctx,"it.unibo.progCtx.Evhthinkingrequest","thinkingRequest").  
-eventhandler(evhcommands,progctx,"it.unibo.progCtx.Evhcommands","manageCommandsEvent").  
+eventhandler(evhdeletemap,consolectx,"it.unibo.consoleCtx.Evhdeletemap","deleteMapCmd").  
+eventhandler(evhconsole,consolectx,"it.unibo.consoleCtx.Evhconsole","consoleCmd").  
 %%% -------------------------------------------
 

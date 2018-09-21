@@ -8,3 +8,4 @@ plan(4,handleCmd, sentence(true,forward(qabusinesslogicproban, directionReceived
 plan(1,waitForRobotResponse, sentence(true,move(print("ROBOT SOFFRITTI: let's see what's in front of me...")),'','' ))
 plan(1,robotResponse, sentence(true,eventswitch(robotAnswerMid, »robotAnswerMid( "clear"), not here StateMoveNormal ),'','' ))
 plan(2,robotResponse, sentence(true,eventswitch(robotAnswerMid, »robotAnswerMid( "obstacle"), not here StateMoveNormal ),'','' ))
+plan(1,finish, sentence(true,move(print("ROBOT SOFFRITTI: fine pulizia. Terminazione.")),'','' ))

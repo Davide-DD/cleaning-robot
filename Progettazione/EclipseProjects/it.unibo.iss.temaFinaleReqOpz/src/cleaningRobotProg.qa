@@ -63,25 +63,28 @@ EventHandler evhcommands for manageCommandsEvent {
  	forwardEvent qafrontend -m manageCommandsMsg 	//from event to message     	
 };
 
-QActor qahuelampemulatoractivator context progCtx {
-	Plan init normal [
-		println("ACTIVATING HUELAMP EMULATOR");
-		delay 1000
-		// javaRun it.unibo.hue.gui.gui.startGui() // CRASHES: why?
-	]
-}
+Context consoleCtx ip [ host="localhost"  port=8020 ] -g yellow 
 
-QActor qafrontendactivator context progCtx {
+
+EventHandler evhdeletemap for deleteMapCmd {
+ 	forwardEvent qabusinesslogicproban -m deleteMapMsg  	//from event to message     	
+};
+
+EventHandler evhconsole for consoleCmd {
+ 	forwardEvent qabusinesslogicproban -m consoleMsg  	//from event to message     	
+};
+
+QActor qafrontendactivator context consoleCtx {
 	Plan init normal [
 		println("ACTIVATING CONSOLE SERVER");
 		delay 1000;
 		// Setting mode to production hides simulator in frontend
 		// To make sure it works in debug mode ( ), cityInformation server must not be executed
-		nodeOp "./nodeCode/console/bin/www --mode debug --qaPo 8019 --qaAddr localhost --mqttProto tcp --mqttPort 1883 --mqttAddr localhost"
+		nodeOp "./nodeCode/console/bin/www --mode debug --qaPo 8020 --qaAddr localhost --mqttProto tcp --mqttPort 1883 --mqttAddr localhost"
 	]
 }
 
-QActor qafrontend context progCtx {
+QActor qafrontend context consoleCtx -pubsub {
 	Plan init normal [
 	] switchTo waitForCommands
 	
@@ -186,7 +189,9 @@ QActor qabusinesslogicproban context progCtx {
      	whenMsg thoughtMsg : thought(mind, DATA) do {
      		onMsg thoughtMsg : thought(mind, "finished") ->
      			emit finished : finished("finishedCleaning");
-     		onMsg thoughtMsg : thought(mind, "cantfinish") ->
+     		onMsg thoughtMsg : thought(mind, "impassableObstacle") ->
+     			emit finished : finished("cantFinish");
+     		onMsg thoughtMsg : thought(mind, "obstructedFinalPosition") ->
      			emit finished : finished("cantFinish");
      		onMsg thoughtMsg : thought(mind, "error") ->
      			emit finished : finished("cantFinish");
@@ -202,6 +207,7 @@ QActor qabusinesslogicproban context progCtx {
     Plan waitForRobotResponse[ ] 
     transition stopAfter 30000000 
         whenMsg consoleMsg -> handleStopOrFinished,
+        whenEvent finished -> handleStopOrFinished,
      	whenMsg robotAnswer -> handleRobotAnswer,
      	whenMsg thinkingRequestReceived -> waitForAlgCmd,
      	whenMsg timeMsg -> handleCityMsg,
@@ -232,6 +238,7 @@ QActor qabusinesslogicproban context progCtx {
     	};
     	println("STOP command received from console or triggered from application");
     	addRule rStop; // TEST PURPOSES
+    	emit thinkingRequest : thinkingRequest('reset');
     	emit ledEvent : ledEvent('off');
     	[!? systemmodel( name(application), value(on) )] {
     		emit manageCommandsEvent : manageCommands("buslog", "enable_start, disable_stop")
@@ -284,7 +291,7 @@ QActor qamindofrobotproban context progCtx {
     	println( "MIND: handleThinking");
     	onMsg thinkingRequestMsg : thinkingRequest('reset') -> {
     		println("ThinkingRequest received: reset");
-    		javaRun it.unibo.ppcr.ai.ppcr.setOptimal();
+    		javaRun it.unibo.ppcr.ai.ppcr.setOptimal("reset");
     		actorOp getNextMove(clear);
     		[ ?? actorOpDone( OP, R ) ] {
 	    		emit thought : thought(mind, R);
@@ -478,7 +485,7 @@ QActor qasoffrittirobot context progCtx {
      ]
 }
 
-QActor qacityinformationproban context progCtx {
+QActor qacityinformationproban context progCtx -pubsub {
 	Plan init normal [
 		println("ACTIVATING CITY SERVER")
 		// Se si eseguono i test, commentare la riga sotto

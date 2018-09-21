@@ -79,7 +79,7 @@ public abstract class AbstractQafrontendactivator extends QActor {
 	    	aar = delayReactive(1000,"" , "");
 	    	if( aar.getInterrupted() ) curPlanInExec   = "init";
 	    	if( ! aar.getGoon() ) return ;
-	    	runNodeJs( "./nodeCode/console/bin/www --mode debug --qaPo 8019 --qaAddr localhost --mqttProto tcp --mqttPort 1883 --mqttAddr localhost", "false"); 
+	    	runNodeJs( "./nodeCode/console/bin/www --mode debug --qaPo 8020 --qaAddr localhost --mqttProto tcp --mqttPort 1883 --mqttAddr localhost", "false"); 
 	    	repeatPlanNoTransition(pr,myselfName,"qafrontendactivator_"+myselfName,false,false);
 	    }catch(Exception e_init){  
 	    	 println( getName() + " plan=init WARNING:" + e_init.getMessage() );

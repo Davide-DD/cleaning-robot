@@ -61,6 +61,7 @@ public abstract class AbstractQasoffrittirobot extends QActor {
 	    	stateTab.put("handleCmd",handleCmd);
 	    	stateTab.put("waitForRobotResponse",waitForRobotResponse);
 	    	stateTab.put("robotResponse",robotResponse);
+	    	stateTab.put("finish",finish);
 	    }
 	    StateFun handleToutBuiltIn = () -> {	
 	    	try{	
@@ -98,8 +99,8 @@ public abstract class AbstractQasoffrittirobot extends QActor {
 	    	println( temporaryStr );  
 	    	//bbb
 	     msgTransition( pr,myselfName,"qasoffrittirobot_"+myselfName,false,
-	          new StateFun[]{stateTab.get("waitForCommand") }, 
-	          new String[]{"true","E","robotAnswerMid" },
+	          new StateFun[]{stateTab.get("waitForCommand"), stateTab.get("finish") }, 
+	          new String[]{"true","E","robotAnswerMid", "true","E","finished" },
 	          30000000, "handleToutBuiltIn" );//msgTransition
 	    }catch(Exception e_waitForFrontendActivation){  
 	    	 println( getName() + " plan=waitForFrontendActivation WARNING:" + e_waitForFrontendActivation.getMessage() );
@@ -115,8 +116,8 @@ public abstract class AbstractQasoffrittirobot extends QActor {
 	    	println( temporaryStr );  
 	    	//bbb
 	     msgTransition( pr,myselfName,"qasoffrittirobot_"+myselfName,false,
-	          new StateFun[]{stateTab.get("handleCmd") }, 
-	          new String[]{"true","M","robotCmd" },
+	          new StateFun[]{stateTab.get("handleCmd"), stateTab.get("finish") }, 
+	          new String[]{"true","M","robotCmd", "true","E","finished" },
 	          100000, "handleToutBuiltIn" );//msgTransition
 	    }catch(Exception e_waitForCommand){  
 	    	 println( getName() + " plan=waitForCommand WARNING:" + e_waitForCommand.getMessage() );
@@ -162,8 +163,8 @@ public abstract class AbstractQasoffrittirobot extends QActor {
 	    	println( temporaryStr );  
 	    	//bbb
 	     msgTransition( pr,myselfName,"qasoffrittirobot_"+myselfName,false,
-	          new StateFun[]{stateTab.get("robotResponse") }, 
-	          new String[]{"true","E","robotAnswerMid" },
+	          new StateFun[]{stateTab.get("robotResponse"), stateTab.get("finish") }, 
+	          new String[]{"true","E","robotAnswerMid", "true","E","finished" },
 	          100000, "handleToutBuiltIn" );//msgTransition
 	    }catch(Exception e_waitForRobotResponse){  
 	    	 println( getName() + " plan=waitForRobotResponse WARNING:" + e_waitForRobotResponse.getMessage() );
@@ -211,6 +212,19 @@ public abstract class AbstractQasoffrittirobot extends QActor {
 	    	 QActorContext.terminateQActorSystem(this); 
 	    }
 	    };//robotResponse
+	    
+	    StateFun finish = () -> {	
+	    try{	
+	     PlanRepeat pr = PlanRepeat.setUp("finish",-1);
+	    	String myselfName = "finish";  
+	    	temporaryStr = "\"ROBOT SOFFRITTI: fine pulizia. Terminazione.\"";
+	    	println( temporaryStr );  
+	    	repeatPlanNoTransition(pr,myselfName,"qasoffrittirobot_"+myselfName,false,false);
+	    }catch(Exception e_finish){  
+	    	 println( getName() + " plan=finish WARNING:" + e_finish.getMessage() );
+	    	 QActorContext.terminateQActorSystem(this); 
+	    }
+	    };//finish
 	    
 	    protected void initSensorSystem(){
 	    	//doing nothing in a QActor

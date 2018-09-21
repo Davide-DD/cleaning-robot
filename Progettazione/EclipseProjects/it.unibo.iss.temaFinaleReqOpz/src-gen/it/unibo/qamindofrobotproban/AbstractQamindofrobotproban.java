@@ -58,6 +58,7 @@ public abstract class AbstractQamindofrobotproban extends QActor {
 	    	stateTab.put("init",init);
 	    	stateTab.put("waitForThinkingRequest",waitForThinkingRequest);
 	    	stateTab.put("handleThinking",handleThinking);
+	    	stateTab.put("finish",finish);
 	    }
 	    StateFun handleToutBuiltIn = () -> {	
 	    	try{	
@@ -95,8 +96,8 @@ public abstract class AbstractQamindofrobotproban extends QActor {
 	    	println( temporaryStr );  
 	    	//bbb
 	     msgTransition( pr,myselfName,"qamindofrobotproban_"+myselfName,false,
-	          new StateFun[]{stateTab.get("handleThinking") }, 
-	          new String[]{"true","M","thinkingRequestMsg" },
+	          new StateFun[]{stateTab.get("handleThinking"), stateTab.get("finish") }, 
+	          new String[]{"true","M","thinkingRequestMsg", "true","E","finished" },
 	          300000, "handleToutBuiltIn" );//msgTransition
 	    }catch(Exception e_waitForThinkingRequest){  
 	    	 println( getName() + " plan=waitForThinkingRequest WARNING:" + e_waitForThinkingRequest.getMessage() );
@@ -120,7 +121,7 @@ public abstract class AbstractQamindofrobotproban extends QActor {
 	    		{//actionseq
 	    		temporaryStr = "\"ThinkingRequest received: reset\"";
 	    		println( temporaryStr );  
-	    		it.unibo.ppcr.ai.ppcr.setOptimal( myself  );
+	    		it.unibo.ppcr.ai.ppcr.setOptimal( myself ,"reset"  );
 	    		parg = "getNextMove(clear)"; 
 	    		actorOpExecute(parg, false);	//OCT17		 
 	    		if( (guardVars = QActorUtils.evalTheGuard(this, " ??actorOpDone(OP,R)" )) != null ){
@@ -145,8 +146,7 @@ public abstract class AbstractQamindofrobotproban extends QActor {
 	    		{//actionseq
 	    		temporaryStr = "\"ThinkingRequest received: deleteMap\"";
 	    		println( temporaryStr );  
-	    		parg = "deleteMap()"; 
-	    		actorOpExecute(parg, false);	//OCT17		 
+	    		it.unibo.ppcr.ai.ppcr.deleteMap( myself  );
 	    		};//actionseq
 	    	}
 	    	//onMsg 
@@ -203,6 +203,19 @@ public abstract class AbstractQamindofrobotproban extends QActor {
 	    	 QActorContext.terminateQActorSystem(this); 
 	    }
 	    };//handleThinking
+	    
+	    StateFun finish = () -> {	
+	    try{	
+	     PlanRepeat pr = PlanRepeat.setUp("finish",-1);
+	    	String myselfName = "finish";  
+	    	temporaryStr = "\"MIND: fine pulizia. Terminazione.\"";
+	    	println( temporaryStr );  
+	    	repeatPlanNoTransition(pr,myselfName,"qamindofrobotproban_"+myselfName,false,false);
+	    }catch(Exception e_finish){  
+	    	 println( getName() + " plan=finish WARNING:" + e_finish.getMessage() );
+	    	 QActorContext.terminateQActorSystem(this); 
+	    }
+	    };//finish
 	    
 	    protected void initSensorSystem(){
 	    	//doing nothing in a QActor

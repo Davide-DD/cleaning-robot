@@ -221,9 +221,10 @@ public class ppcr {
 		return null;
 	}
 
-	public static void setOptimal(QActor myself) {
+	public static void setOptimal(QActor myself, String isReset) {
 		//boolean[][] obstacles = bfs.getObstaclesMap();
 		init(grid);
+		
 		// Apertura file mappa
 		// se non lo si trova non si attiva la modalità ottima
 		boolean[][] obstacles = ppcr.openMapFile("map.dat");

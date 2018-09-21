@@ -224,13 +224,25 @@ public abstract class AbstractQabusinesslogicproban extends QActor {
 	            	}
 	            	//onMsg 
 	            	setCurrentMsgFromStore(); 
-	            	curT = Term.createTerm("thought(mind,\"cantfinish\")");
+	            	curT = Term.createTerm("thought(mind,\"impassableObstacle\")");
 	            	if( currentMessage != null && currentMessage.msgId().equals("thoughtMsg") && 
 	            		pengine.unify(curT, Term.createTerm("thought(SENDER,DATA)")) && 
 	            		pengine.unify(curT, Term.createTerm( currentMessage.msgContent() ) )){ 
 	            		String parg="finished(\"cantFinish\")";
 	            		/* RaiseEvent */
-	            		parg = updateVars(Term.createTerm("thought(SENDER,DATA)"),  Term.createTerm("thought(mind,\"cantfinish\")"), 
+	            		parg = updateVars(Term.createTerm("thought(SENDER,DATA)"),  Term.createTerm("thought(mind,\"impassableObstacle\")"), 
+	            			    		  					Term.createTerm(currentMessage.msgContent()), parg);
+	            		if( parg != null ) emit( "finished", parg );
+	            	}
+	            	//onMsg 
+	            	setCurrentMsgFromStore(); 
+	            	curT = Term.createTerm("thought(mind,\"obstructedFinalPosition\")");
+	            	if( currentMessage != null && currentMessage.msgId().equals("thoughtMsg") && 
+	            		pengine.unify(curT, Term.createTerm("thought(SENDER,DATA)")) && 
+	            		pengine.unify(curT, Term.createTerm( currentMessage.msgContent() ) )){ 
+	            		String parg="finished(\"cantFinish\")";
+	            		/* RaiseEvent */
+	            		parg = updateVars(Term.createTerm("thought(SENDER,DATA)"),  Term.createTerm("thought(mind,\"obstructedFinalPosition\")"), 
 	            			    		  					Term.createTerm(currentMessage.msgContent()), parg);
 	            		if( parg != null ) emit( "finished", parg );
 	            	}
@@ -282,8 +294,8 @@ public abstract class AbstractQabusinesslogicproban extends QActor {
 	    	String myselfName = "waitForRobotResponse";  
 	    	//bbb
 	     msgTransition( pr,myselfName,"qabusinesslogicproban_"+myselfName,false,
-	          new StateFun[]{stateTab.get("handleStopOrFinished"), stateTab.get("handleRobotAnswer"), stateTab.get("waitForAlgCmd"), stateTab.get("handleCityMsg"), stateTab.get("handleCityMsg") }, 
-	          new String[]{"true","M","consoleMsg", "true","M","robotAnswer", "true","M","thinkingRequestReceived", "true","M","timeMsg", "true","M","tempMsg" },
+	          new StateFun[]{stateTab.get("handleStopOrFinished"), stateTab.get("handleStopOrFinished"), stateTab.get("handleRobotAnswer"), stateTab.get("waitForAlgCmd"), stateTab.get("handleCityMsg"), stateTab.get("handleCityMsg") }, 
+	          new String[]{"true","M","consoleMsg", "true","E","finished", "true","M","robotAnswer", "true","M","thinkingRequestReceived", "true","M","timeMsg", "true","M","tempMsg" },
 	          30000000, "handleToutBuiltIn" );//msgTransition
 	    }catch(Exception e_waitForRobotResponse){  
 	    	 println( getName() + " plan=waitForRobotResponse WARNING:" + e_waitForRobotResponse.getMessage() );
@@ -368,6 +380,8 @@ public abstract class AbstractQabusinesslogicproban extends QActor {
 	    	println( temporaryStr );  
 	    	temporaryStr = "rStop";
 	    	addRule( temporaryStr );  
+	    	temporaryStr = QActorUtils.unifyMsgContent(pengine, "thinkingRequest(DATA)","thinkingRequest(\"reset\")", guardVars ).toString();
+	    	emit( "thinkingRequest", temporaryStr );
 	    	temporaryStr = QActorUtils.unifyMsgContent(pengine, "ledEvent(VALUE)","ledEvent(\"off\")", guardVars ).toString();
 	    	emit( "ledEvent", temporaryStr );
 	    	if( (guardVars = QActorUtils.evalTheGuard(this, " !?systemmodel(name(application),value(on))" )) != null ){

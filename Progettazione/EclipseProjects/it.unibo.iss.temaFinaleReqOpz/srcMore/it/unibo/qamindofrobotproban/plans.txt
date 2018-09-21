@@ -6,3 +6,4 @@ plan(3,handleThinking, sentence(true,msgswitch(thinkingRequestMsg, thinkingReque
 plan(4,handleThinking, sentence(true,msgswitch(thinkingRequestMsg, thinkingRequest( "obstacle") , not here StateMoveNormal),'','' ))
 plan(5,handleThinking, sentence(true,msgswitch(thinkingRequestMsg, thinkingRequest( "clear") , not here StateMoveNormal),'','' ))
 plan(6,handleThinking, sentence(true,move(resumeplan),'','' ))
+plan(1,finish, sentence(true,move(print("MIND: fine pulizia. Terminazione.")),'','' ))

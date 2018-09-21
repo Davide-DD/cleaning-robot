@@ -75,6 +75,7 @@ public abstract class AbstractQacityinformationproban extends QActor {
 	    	String myselfName = "init";  
 	    	temporaryStr = "\"ACTIVATING CITY SERVER\"";
 	    	println( temporaryStr );  
+	     connectToMqttServer("tcp://localhost:1883");
 	    	repeatPlanNoTransition(pr,myselfName,"qacityinformationproban_"+myselfName,false,false);
 	    }catch(Exception e_init){  
 	    	 println( getName() + " plan=init WARNING:" + e_init.getMessage() );

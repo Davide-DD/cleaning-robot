@@ -52,4 +52,5 @@ digraph finite_state_machine {
 	waitForFrontendActivation -> waitForFrontendActivation [ label = "repeat "][ style = dashed ][ color = blue ][ fontcolor = blue ]
 	waitForRobotResponse -> waitForAlgCmd [ label = "thinkingRequestReceived" ][ color = black ][ fontcolor = black ]
 	waitForAlgCmd -> handleStopOrFinished [ label = "consoleMsg" ][ color = black ][ fontcolor = black ]
+	waitForRobotResponse -> handleStopOrFinished [ label = "finished" ][ color = black ][ fontcolor = black ]
 }

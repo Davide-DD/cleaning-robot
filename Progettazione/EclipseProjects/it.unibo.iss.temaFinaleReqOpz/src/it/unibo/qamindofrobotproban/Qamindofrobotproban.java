@@ -31,7 +31,7 @@ public class Qamindofrobotproban extends AbstractQamindofrobotproban {
 	}
 	
 	public int setup() {
-		ppcr.setOptimal(null);
+		ppcr.setOptimal(null, "");
 		return 0;
 	}
 	
