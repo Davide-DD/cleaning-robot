@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>hueClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">it.unibo.iss.temaFinaleReqOpz</a> &gt; <a href="index.source.html" class="el_package">it.unibo.hue.components</a> &gt; <span class="el_source">hueClient.java</span></div><h1>hueClient.java</h1><pre class="source lang-java linenums">package it.unibo.hue.components;
+
+import org.json.*;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import it.unibo.qactors.QActorContext;
+import it.unibo.qactors.QActorUtils;
+import it.unibo.qactors.akka.QActor;
+
+<span class="nc" id="L20">public class hueClient {</span>
+<span class="nc" id="L21">	private static QActorContext ctx = null;</span>
+<span class="nc" id="L22">	private static String evId = null;</span>
+<span class="nc" id="L23">	private static String hueBridgeAddr = &quot;127.0.0.1&quot;;</span>
+	// private static String username = &quot;2GgKjwy9JAlW57Dl7qJ1ZRgEpWvjZi6ghN6hesAC&quot;;
+<span class="nc" id="L25">	private static String username = &quot;newdeveloper&quot;;</span>
+<span class="nc" id="L26">	private static String hueCmdPrefix = &quot;http://&quot; + hueBridgeAddr + &quot;/api/&quot; + username + &quot;/&quot;;</span>
+<span class="nc" id="L27">	private static CloseableHttpClient httpclient = null;</span>
+<span class="nc" id="L28">	private static Map&lt;Integer, Thread&gt; threads = new HashMap&lt;Integer, Thread&gt;();</span>
+<span class="nc" id="L29">	private static String globalInfo = &quot;&quot;;</span>
+<span class="nc" id="L30">	private static boolean unreacheableLamp = false;</span>
+
+	public static void setQaCtx(QActor qa, String curevId) {
+<span class="nc" id="L33">		ctx = qa.getQActorContext();</span>
+<span class="nc" id="L34">		evId = curevId;</span>
+<span class="nc" id="L35">	}</span>
+
+	public static void setAddress(String addr) {
+<span class="nc" id="L38">		hueBridgeAddr = addr;</span>
+<span class="nc" id="L39">		hueCmdPrefix = &quot;http://&quot; + hueBridgeAddr + &quot;/api/&quot; + username + &quot;/&quot;;</span>
+<span class="nc" id="L40">	}</span>
+
+	public static void sendPut(QActor qa, String data, String url) {
+		// System.out.println(&quot;sendPut &quot; + url);
+		try {
+<span class="nc" id="L45">			data = data.replace(&quot;'&quot;, &quot;\&quot;&quot;);</span>
+<span class="nc" id="L46">			url = hueCmdPrefix + url.replace(&quot;'&quot;, &quot;\&quot;&quot;);</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">			if (httpclient == null)</span>
+<span class="nc" id="L48">				HttpClients.createDefault();</span>
+<span class="nc" id="L49">			HttpPut request = new HttpPut(url);</span>
+<span class="nc" id="L50">			StringEntity params = new StringEntity(data, &quot;UTF-8&quot;);</span>
+<span class="nc" id="L51">			params.setContentType(&quot;application/json&quot;);</span>
+<span class="nc" id="L52">			request.addHeader(&quot;content-type&quot;, &quot;application/json&quot;);</span>
+<span class="nc" id="L53">			request.addHeader(&quot;Accept&quot;, &quot;*/*&quot;);</span>
+<span class="nc" id="L54">			request.addHeader(&quot;Accept-Encoding&quot;, &quot;gzip,deflate,sdch&quot;);</span>
+<span class="nc" id="L55">			request.addHeader(&quot;Accept-Language&quot;, &quot;en-US,en;q=0.8&quot;);</span>
+<span class="nc" id="L56">			request.setEntity(params);</span>
+<span class="nc" id="L57">			CloseableHttpResponse response = httpclient.execute(request);</span>
+<span class="nc" id="L58">			getAnswerFromServer(response, &quot;put&quot;);</span>
+
+<span class="nc" id="L60">		} catch (Exception e) {</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">			if (!unreacheableLamp)</span>
+<span class="nc" id="L62">				System.out.println(&quot;ERROR &quot; + e.getMessage());</span>
+<span class="nc" id="L63">			unreacheableLamp = true;</span>
+<span class="nc" id="L64">		}</span>
+<span class="nc" id="L65">	}</span>
+
+	public static void sendGet(QActor qa, String cmd) {
+		try {
+<span class="nc bnc" id="L69" title="All 2 branches missed.">			if (httpclient == null)</span>
+<span class="nc" id="L70">				httpclient = HttpClients.createDefault();</span>
+<span class="nc" id="L71">			HttpGet httpGet = new HttpGet(hueCmdPrefix + cmd);</span>
+<span class="nc" id="L72">			CloseableHttpResponse response = httpclient.execute(httpGet);</span>
+<span class="nc" id="L73">			getAnswerFromServer(response, &quot;get&quot;);</span>
+<span class="nc" id="L74">		} catch (Exception e) {</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">			if (!unreacheableLamp)</span>
+<span class="nc" id="L76">				System.out.println(&quot;ERROR &quot; + e.getMessage());</span>
+<span class="nc" id="L77">			unreacheableLamp = true;</span>
+<span class="nc" id="L78">		}</span>
+<span class="nc" id="L79">	}</span>
+
+	public static boolean testConnection(int lamp) {
+<span class="nc" id="L82">		unreacheableLamp = false;</span>
+<span class="nc" id="L83">		sendGet(null, &quot;lights/&quot; + lamp);</span>
+		try {
+<span class="nc" id="L85">			Thread.sleep(2);</span>
+<span class="nc" id="L86">		} catch (InterruptedException e) {</span>
+<span class="nc" id="L87">			e.printStackTrace();</span>
+<span class="nc" id="L88">		}</span>
+<span class="nc" id="L89">		return unreacheableLamp;</span>
+	}
+
+	public static void on(int lamp) {
+<span class="nc" id="L93">		sendGet(null, &quot;lights/&quot; + lamp);</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">		if (threads.get(lamp) != null) {</span>
+<span class="nc" id="L95">			threads.get(lamp).interrupt();</span>
+<span class="nc" id="L96">			threads.remove(lamp); // Avoiding duplicate threads </span>
+		}
+<span class="nc" id="L98">		String cmd = &quot;{'on':true, \&quot;bri\&quot;:167}&quot;;</span>
+<span class="nc" id="L99">		sendPut(null, cmd, &quot;lights/&quot; + lamp + &quot;/state&quot;);</span>
+<span class="nc" id="L100">	}</span>
+
+	public static void off(int lamp) {
+<span class="nc" id="L103">		sendGet(null, &quot;lights/&quot; + lamp);</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">		if (threads.get(lamp) != null) {</span>
+<span class="nc" id="L105">			threads.get(lamp).interrupt();</span>
+<span class="nc" id="L106">			threads.remove(lamp); // Avoiding duplicate threads </span>
+		}
+<span class="nc" id="L108">		String cmd = &quot;{'on':false}&quot;;</span>
+<span class="nc" id="L109">		sendPut(null, cmd, &quot;lights/&quot; + lamp + &quot;/state&quot;);</span>
+<span class="nc" id="L110">	}</span>
+
+	public static void blink(int lamp) {
+				
+		// Avoiding duplicate blink threads and waste of resources
+<span class="nc bnc" id="L115" title="All 2 branches missed.">		if (threads.get(lamp) != null) {</span>
+<span class="nc" id="L116">			System.out.println(&quot;WARNING: lamp &quot; + lamp + &quot; already blinking, doing nothing.&quot;);</span>
+<span class="nc" id="L117">			return;</span>
+		}
+		
+<span class="nc" id="L120">		sendGet(null, &quot;lights/&quot; + lamp);</span>
+		
+<span class="nc" id="L122">		Thread t = new Thread(new Runnable() {</span>
+			public void run() {
+<span class="nc" id="L124">				String cmd = &quot;&quot;;</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">				while (!Thread.currentThread().isInterrupted()) {</span>
+					try {
+<span class="nc" id="L127">						cmd = &quot;{'on':false}&quot;;</span>
+<span class="nc" id="L128">						hueClient.sendPut(null, cmd, &quot;lights/&quot; + lamp + &quot;/state&quot;);</span>
+<span class="nc" id="L129">						Thread.sleep(1000);</span>
+<span class="nc" id="L130">						cmd = &quot;{'on':true, \&quot;bri\&quot;:167}&quot;;</span>
+<span class="nc" id="L131">						hueClient.sendPut(null, cmd, &quot;lights/&quot; + lamp + &quot;/state&quot;);</span>
+<span class="nc" id="L132">						Thread.sleep(1000);</span>
+<span class="nc" id="L133">					} catch (InterruptedException e) {</span>
+<span class="nc" id="L134">						Thread.currentThread().interrupt();</span>
+<span class="nc" id="L135">					}</span>
+				}
+<span class="nc" id="L137">			}</span>
+		});
+<span class="nc" id="L139">		threads.put(lamp, t);</span>
+<span class="nc" id="L140">		t.start();</span>
+<span class="nc" id="L141">	}</span>
+
+	protected static void getAnswerFromServer(CloseableHttpResponse response, String verb) {
+		try {
+<span class="nc bnc" id="L145" title="All 2 branches missed.">			if (response.getStatusLine().getStatusCode() != 200) {</span>
+<span class="nc" id="L146">				throw new RuntimeException(&quot;Failed : HTTP error code : &quot; + response.getStatusLine().getStatusCode());</span>
+			}
+<span class="nc" id="L148">			BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));</span>
+			String output;
+<span class="nc" id="L150">			String info = &quot;&quot;;</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">			while ((output = br.readLine()) != null) {</span>
+<span class="nc" id="L152">				info = info + output;</span>
+			}
+<span class="nc" id="L154">			System.out.println(&quot;Output from Server .... &quot;);</span>
+<span class="nc" id="L155">			System.out.println(info);</span>
+<span class="nc" id="L156">			globalInfo = info;</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">			if (ctx != null) {</span>
+<span class="nc" id="L158">				String msg = evId + &quot;(&quot; + verb + &quot;, '&quot; + info + &quot;')&quot;;</span>
+				// System.out.println(msg);
+<span class="nc" id="L160">				QActorUtils.raiseEvent(ctx, &quot;clienthttp&quot;, evId, msg);</span>
+			}
+<span class="nc" id="L162">		} catch (Exception e) {</span>
+<span class="nc" id="L163">			System.out.println(&quot;ERROR &quot; + e.getMessage());</span>
+<span class="nc" id="L164">		}</span>
+
+<span class="nc" id="L166">	}</span>
+
+	public static int getNumLights() {
+<span class="nc" id="L169">		sendGet(null, &quot;lights/&quot;);</span>
+<span class="nc" id="L170">		return new JSONObject(globalInfo).keySet().size();</span>
+	}
+
+	// TEST
+	public static void main(String args[]) {
+		/*
+		 * try { on(2); Thread.sleep(2000); off(2); Thread.sleep(2000); blink(2);
+		 * Thread.sleep(10000); off(2);
+		 * 
+		 * } catch (InterruptedException e) { e.printStackTrace(); }
+		 * System.out.println(getNumLights());
+		 */
+
+<span class="nc" id="L183">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

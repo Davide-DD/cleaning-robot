@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AStarNode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">it.unibo.iss.temaFinaleReqOpz</a> &gt; <a href="index.source.html" class="el_package">it.unibo.ppcr.components</a> &gt; <span class="el_source">AStarNode.java</span></div><h1>AStarNode.java</h1><pre class="source lang-java linenums">package it.unibo.ppcr.components;
+
+public class AStarNode extends Node {   
+
+	private int g;
+    private int f;
+    private int h;
+    private AStarNode parent;
+    
+    public AStarNode(int row, int col) {
+<span class="nc" id="L11">		super(row, col);</span>
+<span class="nc" id="L12">	}</span>
+
+
+    public void calculateHeuristic(AStarNode finalNode) {
+<span class="nc" id="L16">        this.h = Math.abs(finalNode.getX() - getX()) + Math.abs(finalNode.getY() - getY());</span>
+<span class="nc" id="L17">    }</span>
+
+    public void setNodeData(AStarNode currentNode, int cost) {
+<span class="nc" id="L20">        int gCost = currentNode.getG() + cost;</span>
+<span class="nc" id="L21">        setParent(currentNode);</span>
+<span class="nc" id="L22">        setG(gCost);</span>
+<span class="nc" id="L23">        calculateFinalCost();</span>
+<span class="nc" id="L24">    }</span>
+
+    public boolean checkBetterPath(AStarNode currentNode, int cost) {
+<span class="nc" id="L27">        int gCost = currentNode.getG() + cost;</span>
+<span class="nc bnc" id="L28" title="All 2 branches missed.">        if (gCost &lt; getG()) {</span>
+<span class="nc" id="L29">            setNodeData(currentNode, cost);</span>
+<span class="nc" id="L30">            return true;</span>
+        }
+<span class="nc" id="L32">        return false;</span>
+    }
+
+    private void calculateFinalCost() {
+<span class="nc" id="L36">        int finalCost = getG() + getH();</span>
+<span class="nc" id="L37">        setF(finalCost);</span>
+<span class="nc" id="L38">    }</span>
+
+    public int getH() {
+<span class="nc" id="L41">        return h;</span>
+    }
+
+    public void setH(int h) {
+<span class="nc" id="L45">        this.h = h;</span>
+<span class="nc" id="L46">    }</span>
+
+    public int getG() {
+<span class="nc" id="L49">        return g;</span>
+    }
+
+    public void setG(int g) {
+<span class="nc" id="L53">        this.g = g;</span>
+<span class="nc" id="L54">    }</span>
+
+    public int getF() {
+<span class="nc" id="L57">        return f;</span>
+    }
+
+    public void setF(int f) {
+<span class="nc" id="L61">        this.f = f;</span>
+<span class="nc" id="L62">    }</span>
+
+    public AStarNode getParent() {
+<span class="nc" id="L65">        return parent;</span>
+    }
+
+    public void setParent(AStarNode parent) {
+<span class="nc" id="L69">        this.parent = parent;</span>
+<span class="nc" id="L70">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

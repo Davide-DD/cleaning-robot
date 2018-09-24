@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ppcr.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">it.unibo.iss.temaFinaleReqOpz</a> &gt; <a href="index.source.html" class="el_package">it.unibo.ppcr.ai</a> &gt; <span class="el_source">ppcr.java</span></div><h1>ppcr.java</h1><pre class="source lang-java linenums">package it.unibo.ppcr.ai;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import it.unibo.ppcr.components.BFSNode;
+import it.unibo.ppcr.components.Command;
+import it.unibo.ppcr.components.Node;
+import it.unibo.ppcr.gui.Grid;
+import it.unibo.qactors.akka.QActor;
+
+<span class="nc" id="L13">public class ppcr {</span>
+	private static int rows;
+	private static int cols;
+	private static Node currentNode;
+	private static Node initialNode;
+	private static Node finalNode;
+	private static int currentDirection; // direzione del robot: 0=giu, 1=sinistra, 2=su, 3=destra
+	private static int timeToPause;
+
+	private static int timesToCheck;
+	private static int timesChecked;
+
+	private static List&lt;BFSNode&gt; partialPath;
+	private static Node savedNode;
+	private static boolean firstPart;
+	private static boolean needToWait;
+	private static int clearSequenceReceived;
+
+	private static BFS bfs;
+	private static Node obstacleNode;
+	private static List&lt;Node&gt; toFinalPosition;
+	private static Grid grid;
+	
+	private static boolean done;
+	
+	private static void saveMapFile(boolean[][] map, String fileName) {
+		try {
+			
+<span class="nc" id="L41">			FileOutputStream fos = new FileOutputStream(fileName);</span>
+<span class="nc" id="L42">			ObjectOutputStream oos = new ObjectOutputStream(fos);</span>
+
+<span class="nc" id="L44">			oos.writeObject(map);</span>
+
+<span class="nc" id="L46">			oos.flush();</span>
+<span class="nc" id="L47">			fos.close();</span>
+			
+<span class="nc" id="L49">		} catch (Exception e)  {</span>
+<span class="nc" id="L50">			System.out.println(&quot;File writing error: &quot; + e);</span>
+<span class="nc" id="L51">		}</span>
+
+<span class="nc" id="L53">	}</span>
+	
+	private static boolean[][] openMapFile(String fileName) {
+<span class="nc" id="L56">		Object obj = new Object();</span>
+		
+		try {
+			
+<span class="nc" id="L60">			FileInputStream fis = new FileInputStream(fileName);</span>
+<span class="nc" id="L61">			ObjectInputStream ois = new ObjectInputStream(fis);</span>
+
+<span class="nc" id="L63">			obj = ois.readObject();</span>
+
+<span class="nc" id="L65">			fis.close();</span>
+
+<span class="nc" id="L67">			return (boolean[][]) obj;</span>
+
+<span class="nc" id="L69">		} catch (Exception e) { </span>
+<span class="nc" id="L70">			System.out.println(&quot;File reading error: &quot; + e);</span>
+<span class="nc" id="L71">			return null;</span>
+		}
+
+	}
+	
+	public static void deleteMap(QActor myself) {
+
+		try {
+
+<span class="nc" id="L80">			File file = new File(&quot;map.dat&quot;);</span>
+
+<span class="nc bnc" id="L82" title="All 2 branches missed.">			if(!file.delete()) {</span>
+<span class="nc" id="L83">				System.out.println(&quot;Can't delete file.&quot;);</span>
+			}
+
+<span class="nc" id="L86">		} catch(Exception e) {</span>
+<span class="nc" id="L87">			e.printStackTrace();</span>
+<span class="nc" id="L88">		}</span>
+		
+<span class="nc" id="L90">	}</span>
+
+	public static void init(Grid grid) {
+<span class="nc" id="L93">		setRows(10);</span>
+<span class="nc" id="L94">		setCols(getRows() + 1);</span>
+<span class="nc" id="L95">		currentDirection = 2;</span>
+<span class="nc" id="L96">		currentNode = new Node(0, 0);</span>
+<span class="nc" id="L97">		initialNode = currentNode;</span>
+<span class="nc" id="L98">		finalNode = new Node(getRows() - 1, getCols() - 1);</span>
+
+<span class="nc" id="L100">		bfs = new BFS(getRows(), getCols());</span>
+<span class="nc" id="L101">		bfs.setVisited(initialNode);</span>
+<span class="nc" id="L102">		partialPath = new ArrayList&lt;BFSNode&gt;();</span>
+
+<span class="nc" id="L104">		timeToPause = 600;</span>
+<span class="nc" id="L105">		timesToCheck = 0;</span>
+<span class="nc" id="L106">		timesChecked = 0;</span>
+<span class="nc" id="L107">		needToWait = false;</span>
+<span class="nc" id="L108">		clearSequenceReceived = 0;</span>
+<span class="nc" id="L109">		firstPart = true;</span>
+<span class="nc" id="L110">		setGrid(grid);</span>
+<span class="nc" id="L111">	}</span>
+
+	public static void initForTests(int nrows, int ncols) {
+<span class="nc" id="L114">		setRows(nrows);</span>
+<span class="nc" id="L115">		setCols(ncols);</span>
+<span class="nc" id="L116">		currentDirection = 0;</span>
+<span class="nc" id="L117">		currentNode = new Node(0, 0);</span>
+<span class="nc" id="L118">		initialNode = currentNode;</span>
+<span class="nc" id="L119">		finalNode = new Node(getRows() - 1, getCols() - 1);</span>
+
+<span class="nc" id="L121">		bfs = new BFS(getRows(), getCols());</span>
+<span class="nc" id="L122">		bfs.setVisited(initialNode);</span>
+<span class="nc" id="L123">		partialPath = new ArrayList&lt;BFSNode&gt;();</span>
+
+<span class="nc" id="L125">		timeToPause = 1000;</span>
+<span class="nc" id="L126">		timesToCheck = 1;</span>
+<span class="nc" id="L127">		timesChecked = 0;</span>
+<span class="nc" id="L128">		needToWait = false;</span>
+<span class="nc" id="L129">		clearSequenceReceived = 0;</span>
+<span class="nc" id="L130">		firstPart = true;</span>
+<span class="nc" id="L131">		grid = new Grid(getRows(), getCols());</span>
+<span class="nc" id="L132">	}</span>
+
+	private static Command moveBackward(Node currentNode, Node previousNode) {
+		// Si muove in lunghezza (da colonna a colonna)
+<span class="nc bnc" id="L136" title="All 2 branches missed.">		if (currentNode.getX() == previousNode.getX())</span>
+<span class="nc" id="L137">			return new Command(&quot;s&quot;, &quot;width&quot;);</span>
+		// Si muove in altezza (da riga a riga)
+		else
+<span class="nc" id="L140">			return new Command(&quot;s&quot;, &quot;height&quot;);</span>
+	}
+
+	private static Command moveForward(Node currentNode, Node previousNode) {
+		// Si muove in lunghezza (da colonna a colonna)
+<span class="nc bnc" id="L145" title="All 2 branches missed.">		if (currentNode.getX() == previousNode.getX())</span>
+<span class="nc" id="L146">			return new Command(&quot;w&quot;, &quot;width&quot;);</span>
+		// Si muove in altezza (da riga a riga)
+		else
+<span class="nc" id="L149">			return new Command(&quot;w&quot;, &quot;height&quot;);</span>
+	}
+
+	private static Command getCommand(Node currentNode, Node nextNode, int startingDirection) {
+		// Movimento verso destra
+		// direzione del robot: 0=giu, 1=sinistra, 2=su, 3=destra
+<span class="nc bnc" id="L155" title="All 2 branches missed.">		if (nextNode.getY() &gt; currentNode.getY()) {</span>
+<span class="nc bnc" id="L156" title="All 5 branches missed.">			switch (startingDirection) {</span>
+			case 3:
+<span class="nc" id="L158">				return new Command(&quot;w&quot;, &quot;width&quot;);</span>
+			case 1:
+<span class="nc" id="L160">				currentDirection = 2;</span>
+<span class="nc" id="L161">				return new Command(&quot;d&quot;, &quot;width&quot;);</span>
+			case 2:
+<span class="nc" id="L163">				currentDirection = 3;</span>
+<span class="nc" id="L164">				return new Command(&quot;d&quot;, &quot;width&quot;);</span>
+			case 0:
+<span class="nc" id="L166">				currentDirection = 3;</span>
+<span class="nc" id="L167">				return new Command(&quot;a&quot;, &quot;width&quot;);</span>
+			}
+		}
+		// Movimento verso sinistra
+		// direzione del robot: 0=giu, 1=sinistra, 2=su, 3=destra
+<span class="nc bnc" id="L172" title="All 2 branches missed.">		if (nextNode.getY() &lt; currentNode.getY()) {</span>
+<span class="nc bnc" id="L173" title="All 5 branches missed.">			switch (startingDirection) {</span>
+			case 3:
+<span class="nc" id="L175">				currentDirection = 2;</span>
+<span class="nc" id="L176">				return new Command(&quot;a&quot;, &quot;width&quot;);</span>
+			case 1:
+<span class="nc" id="L178">				return new Command(&quot;w&quot;, &quot;width&quot;);</span>
+			case 2:
+<span class="nc" id="L180">				currentDirection = 1;</span>
+<span class="nc" id="L181">				return new Command(&quot;a&quot;, &quot;width&quot;);</span>
+			case 0:
+<span class="nc" id="L183">				currentDirection = 1;</span>
+<span class="nc" id="L184">				return new Command(&quot;d&quot;, &quot;width&quot;);</span>
+			}
+		}
+		// Movimento verso il basso
+		// direzione del robot: 0=giu, 1=sinistra, 2=su, 3=destra
+<span class="nc bnc" id="L189" title="All 2 branches missed.">		if (nextNode.getX() &gt; currentNode.getX()) {</span>
+<span class="nc bnc" id="L190" title="All 5 branches missed.">			switch (startingDirection) {</span>
+			case 3:
+<span class="nc" id="L192">				currentDirection = 0;</span>
+<span class="nc" id="L193">				return new Command(&quot;d&quot;, &quot;height&quot;);</span>
+			case 1:
+<span class="nc" id="L195">				currentDirection = 0;</span>
+<span class="nc" id="L196">				return new Command(&quot;a&quot;, &quot;height&quot;);</span>
+			case 2:
+<span class="nc" id="L198">				currentDirection = 1;</span>
+<span class="nc" id="L199">				return new Command(&quot;a&quot;, &quot;height&quot;);</span>
+			case 0:
+<span class="nc" id="L201">				return new Command(&quot;w&quot;, &quot;height&quot;);</span>
+			}
+		}
+		// Movimento verso l'alto
+		// direzione del robot: 0=giu, 1=sinistra, 2=su, 3=destra
+<span class="nc bnc" id="L206" title="All 2 branches missed.">		if (nextNode.getX() &lt; currentNode.getX()) {</span>
+<span class="nc bnc" id="L207" title="All 5 branches missed.">			switch (startingDirection) {</span>
+			case 3:
+<span class="nc" id="L209">				currentDirection = 2;</span>
+<span class="nc" id="L210">				return new Command(&quot;a&quot;, &quot;height&quot;);</span>
+			case 1:
+<span class="nc" id="L212">				currentDirection = 2;</span>
+<span class="nc" id="L213">				return new Command(&quot;d&quot;, &quot;height&quot;);</span>
+			case 2:
+<span class="nc" id="L215">				return new Command(&quot;w&quot;, &quot;height&quot;);</span>
+			case 0:
+<span class="nc" id="L217">				currentDirection = 1;</span>
+<span class="nc" id="L218">				return new Command(&quot;d&quot;, &quot;height&quot;);</span>
+			}
+		}
+<span class="nc" id="L221">		return null;</span>
+	}
+
+	public static void setOptimal(QActor myself, String isReset) {
+		//boolean[][] obstacles = bfs.getObstaclesMap();
+<span class="nc" id="L226">		init(grid);</span>
+		
+		// Apertura file mappa
+		// se non lo si trova non si attiva la modalità ottima
+<span class="nc" id="L230">		boolean[][] obstacles = ppcr.openMapFile(&quot;map.dat&quot;);</span>
+<span class="nc" id="L231">		int num = 0;</span>
+		//grid.getFrame().dispose();
+		
+<span class="nc bnc" id="L234" title="All 2 branches missed.">		if (obstacles != null) {</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">			for (int i = 0; i &lt; obstacles.length; i++) {</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">				for (int j = 0; j &lt; obstacles[0].length; j++) {</span>
+<span class="nc bnc" id="L237" title="All 2 branches missed.">					if (obstacles[i][j]) {</span>
+<span class="nc" id="L238">						num += 1;</span>
+<span class="nc" id="L239">						bfs.setObstacle(new Node(i, j));</span>
+<span class="nc" id="L240">						grid.setObstacle(i, j);</span>
+					}
+
+				}
+			}
+		}
+<span class="nc" id="L246">		bfs.setnObstacles(num);</span>
+<span class="nc" id="L247">	}</span>
+
+	public static String getNextMove(String found) {
+
+		Command command;
+<span class="nc" id="L252">		System.out.println(&quot;\nI am in &quot; + currentNode.getX() + &quot;,&quot; + currentNode.getY());</span>
+<span class="nc" id="L253">		grid.setCleaned(currentNode.getX(), currentNode.getY());</span>
+<span class="nc bnc" id="L254" title="All 14 branches missed.">		switch (found) {</span>
+		case &quot;obstacle&quot;:
+<span class="nc bnc" id="L256" title="All 2 branches missed.">			if (firstPart) {</span>
+
+<span class="nc" id="L258">				clearSequenceReceived = 0;</span>
+
+				// Elimina il path parziale trovato (è sbagliato visto che un pezzo di strada è
+				// bloccato)
+<span class="nc" id="L262">				partialPath = new ArrayList&lt;BFSNode&gt;();</span>
+				// Se c'è un ostacolo nel primo spazio dove viene messe il robot: errore!
+<span class="nc bnc" id="L264" title="All 2 branches missed.">				if (currentNode.equals(initialNode)) {</span>
+<span class="nc" id="L265">					System.out.println(&quot;ERROR: there can't be an obstacole where the robot is positioned at first!&quot;);</span>
+<span class="nc" id="L266">					return &quot;error&quot;;</span>
+				}
+
+				// Come valuto se ostacolo è fisso o mobile? La prima volta che ci vado a
+				// sbattere, torno indietro e aspetto un tempo arbitrario.
+				// Poi ritorno sulla posizione dell'ostacolo. Se non c'è niente significa che
+				// era un ostacolo mobile e che quindi ora si è spostato
+				// e ho pulito lo spazio lasciato da esso. Altrimenti è un ostacolo fisso e devo
+				// marcarlo come tale.
+				// E' possibile anche dire al robot di controllare andando avanti e indietro
+				// verso l'ostacolo più di una volta. Cambiare il parametro timesToCheck di
+				// conseguenza!
+
+<span class="nc bnc" id="L279" title="All 2 branches missed.">				if (timesChecked &lt; timesToCheck) {</span>
+<span class="nc" id="L280">					timesChecked++;</span>
+					// Al prossimo clear (quello che il robo invierà dopo essere tornato nella
+					// posizione precedente), devo aspettare pauseTime secondi per tornare nella
+					// posizione dove è stato rilevato l'ostacolo.
+<span class="nc" id="L284">					System.out.println(&quot;Need to check if &quot; + currentNode.getX() + &quot;,&quot; + currentNode.getY()</span>
+							+ &quot; is a moving obstacle!&quot;);
+<span class="nc" id="L286">					needToWait = true;</span>
+				} else {
+					// Ho controllato timesToCheck volte e l'ostacolo è ancora là, ovvero si tratta
+					// di un ostacolo fisso!
+					// Segna la posizione attuale come ostacolo (fisso)
+<span class="nc" id="L291">					System.out.println(&quot;Marked &quot; + currentNode.getX() + &quot;,&quot; + currentNode.getY() + &quot; as obstacle.&quot;);</span>
+<span class="nc" id="L292">					bfs.setObstacle(currentNode);</span>
+<span class="nc" id="L293">					grid.setObstacle(currentNode.getX(), currentNode.getY());</span>
+					// Al prossimo clear ricevuto non aspetto più
+<span class="nc" id="L295">					needToWait = false;</span>
+					// Resetto il contatore per il prossimo ostacolo che incontrerò
+<span class="nc" id="L297">					timesChecked = 0;</span>
+				}
+				// In ogni caso, muoviti all'indietro per tornare nella posizione salva
+<span class="nc" id="L300">				command = moveBackward(currentNode, savedNode);</span>
+				// Riparte l'algoritmo: current node diventa savedPosition
+				// System.out.println(&quot;Saved node: &quot; + savedNode);
+				// Segno la posizione attuale come posizione in cui c'è un ostacolo e dico che
+				// il nodo corrente è ora il nodo salvato (ovvero senza ostacoli).
+<span class="nc" id="L305">				obstacleNode = currentNode;</span>
+<span class="nc" id="L306">				currentNode = savedNode;</span>
+<span class="nc" id="L307">				return translateTime(command);</span>
+			} else {
+				// Seconda parte: astar
+<span class="nc" id="L310">				new ArrayList&lt;Command&gt;();</span>
+				// Devo tornare indietro
+<span class="nc" id="L312">				command = moveBackward(currentNode, savedNode);</span>
+
+<span class="nc" id="L314">				System.out.println(</span>
+<span class="nc" id="L315">						currentNode.getX() + &quot;,&quot; + currentNode.getY() + &quot; is a moving obstacle! Moving backward...&quot;);</span>
+<span class="nc" id="L316">				obstacleNode = currentNode;</span>
+<span class="nc" id="L317">				currentNode = savedNode;</span>
+<span class="nc" id="L318">				needToWait = true;</span>
+<span class="nc" id="L319">				clearSequenceReceived = 0;</span>
+<span class="nc" id="L320">				return (translateTime(command));</span>
+
+			}
+		case &quot;clear&quot;:
+<span class="nc bnc" id="L324" title="All 2 branches missed.">			if (done) {</span>
+<span class="nc" id="L325">				done = false;</span>
+<span class="nc" id="L326">				return &quot;finished&quot;;</span>
+			}
+<span class="nc bnc" id="L328" title="All 2 branches missed.">			if (firstPart) {</span>
+				// Clear ricevuti in sequenza
+<span class="nc" id="L330">				clearSequenceReceived++;</span>
+				// System.out.println(partialPath);
+				// Mi salvo la posizione attuale: è libera (ha detto il robot).
+				// Me la salvo in modo che se con il prossimo comando il robot troverà un
+				// ostacolo, posso dirgli di tornare indietro.
+<span class="nc" id="L335">				savedNode = currentNode;</span>
+				// System.out.println(&quot;Saved node: &quot; + savedNode.getX() + &quot;,&quot; +
+				// savedNode.getY());
+
+				// Se sto controllando un ostacolo a mia arrivano due clear in sequenza
+				// significa che un eventuale ostacolo prima presente, ora si è scansato!
+<span class="nc bnc" id="L341" title="All 4 branches missed.">				if (timesChecked != 0 &amp;&amp; clearSequenceReceived &gt; 1) {</span>
+					// Al prossimo clear ricevuto non aspetto più
+<span class="nc" id="L343">					needToWait = false;</span>
+					// Resetto il contatore per il prossimo ostacolo che incontrerò
+<span class="nc" id="L345">					timesChecked = 0;</span>
+				}
+				// Se needToWait è true significa che ho appena incontrato un ostacolo e ora
+				// devo aspettare timeToPause secondi prima di tornare avanti e controllare di
+				// nuovo!
+<span class="nc bnc" id="L350" title="All 2 branches missed.">				if (needToWait) {</span>
+<span class="nc" id="L351">					System.out.println(&quot;Waiting &quot; + timeToPause + &quot;ms before checking again!&quot;);</span>
+					try {
+<span class="nc" id="L353">						Thread.sleep(timeToPause);</span>
+<span class="nc" id="L354">					} catch (InterruptedException e) {</span>
+<span class="nc" id="L355">						e.printStackTrace();</span>
+<span class="nc" id="L356">					}</span>
+<span class="nc" id="L357">					System.out.println(&quot;Done! Checking now!&quot;);</span>
+					// Devo andare avanti
+<span class="nc" id="L359">					command = moveForward(currentNode, obstacleNode);</span>
+<span class="nc" id="L360">					System.out</span>
+<span class="nc" id="L361">							.println(&quot;Node to reach: {x: &quot; + obstacleNode.getX() + &quot;, y: &quot; + obstacleNode.getY() + &quot;}&quot;);</span>
+<span class="nc" id="L362">					currentNode = obstacleNode;</span>
+<span class="nc" id="L363">					return translateTime(command);</span>
+
+				} else {
+					// Tutto regolare! Vado avanti normalmente: no ostacoli!
+
+<span class="nc bnc" id="L368" title="All 2 branches missed.">					if (partialPath.size() == 0) { // Il percorso parziale trovato da bfs non ha più nodi?</span>
+						// Devo far rigirare bfs
+<span class="nc" id="L370">						partialPath = bfs.findNearestUnvisitedNode(currentNode, currentDirection);</span>
+						// Se bfs restituisce null, significa che ha &quot;terminato&quot;. Poi sarà verificato
+						// &quot;come&quot; (e cioè se è stato trovato un ostacolo invalicabile o meno)!
+<span class="nc bnc" id="L373" title="All 2 branches missed.">						if (partialPath == null) {</span>
+<span class="nc" id="L374">							firstPart = false;</span>
+<span class="nc" id="L375">							System.out.println(&quot;First part (BFS): terminated!&quot;);</span>
+
+							// Passo intermedio:
+							// 1) Occorre trovare inizialemnte eventuali spazi lasciati non puliti ma che
+							// non possono essere raggiunti (all'interno di perimetri delimitati dal robot)
+<span class="nc bnc" id="L380" title="All 2 branches missed.">							for (Node newObs : bfs.findUnreacheableSpots()) {</span>
+<span class="nc" id="L381">								grid.setObstacle(newObs.getX(), newObs.getY());</span>
+<span class="nc" id="L382">								bfs.setObstacle(newObs);</span>
+<span class="nc" id="L383">							}</span>
+							// 2) Check ostacoli invalicabili
+<span class="nc bnc" id="L385" title="All 2 branches missed.">							if (bfs.impassableObstacle()) {</span>
+<span class="nc" id="L386">								System.out.println(&quot;Found an impassable obstacle! Stopping..&quot;);</span>
+<span class="nc" id="L387">								grid.impassableObstacle();</span>
+<span class="nc" id="L388">								return &quot;impassableObstacle&quot;;</span>
+							}
+
+							// Trovo il path per arrivare al nodo finale (considerando gli ostacoli fissi)
+<span class="nc" id="L392">							AStar astar = new AStar(currentNode, finalNode, bfs.getObstaclesMap());</span>
+<span class="nc" id="L393">							toFinalPosition = astar.findPath();</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">							if (toFinalPosition.size() == 0) {</span>
+<span class="nc" id="L395">								System.out.println(&quot;Could not find a path to reach final position! Stopping..&quot;);</span>
+<span class="nc" id="L396">								grid.obstructedFinalPosition();</span>
+<span class="nc" id="L397">								return &quot;obstructedFinalPosition&quot;;</span>
+							}
+
+<span class="nc" id="L400">							toFinalPosition.remove(0);</span>
+<span class="nc" id="L401">							return &quot;secondPart, 0&quot;;</span>
+						}
+					}
+					// Prendo il primo nodo della lista del percorso parziale trovato
+					// e calcolo quali sono i comandi da dare:
+<span class="nc" id="L406">					command = getCommand(currentNode, partialPath.get(0), currentDirection);</span>
+
+<span class="nc" id="L408">					System.out.println(&quot;Node to reach: {x: &quot; + partialPath.get(0).getX() + &quot;, y: &quot;</span>
+<span class="nc" id="L409">							+ partialPath.get(0).getY() + &quot;}&quot;);</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">					if (command.getAction() == &quot;w&quot;) {</span>
+<span class="nc" id="L411">						currentNode = partialPath.remove(0);</span>
+					}
+					// Restituisco il primo comando
+<span class="nc" id="L414">					return translateTime(command);</span>
+				}
+
+			} else {
+				// Seconda parte: astar
+<span class="nc" id="L419">				savedNode = currentNode;</span>
+<span class="nc" id="L420">				clearSequenceReceived++;</span>
+<span class="nc bnc" id="L421" title="All 2 branches missed.">				if (clearSequenceReceived &gt; 1) {</span>
+<span class="nc" id="L422">					needToWait = false;</span>
+				}
+<span class="nc bnc" id="L424" title="All 2 branches missed.">				if (needToWait) {</span>
+<span class="nc" id="L425">					System.out.println(&quot;Waiting &quot; + timeToPause + &quot;ms before checking again!&quot;);</span>
+					try {
+<span class="nc" id="L427">						Thread.sleep(timeToPause);</span>
+<span class="nc" id="L428">					} catch (InterruptedException e) {</span>
+<span class="nc" id="L429">						e.printStackTrace();</span>
+<span class="nc" id="L430">					}</span>
+<span class="nc" id="L431">					System.out.println(&quot;Done! Checking now!&quot;);</span>
+					// Devo andare avanti
+<span class="nc" id="L433">					command = moveForward(currentNode, obstacleNode);</span>
+<span class="nc" id="L434">					System.out</span>
+<span class="nc" id="L435">							.println(&quot;Node to reach: {x: &quot; + obstacleNode.getX() + &quot;, y: &quot; + obstacleNode.getY() + &quot;}&quot;);</span>
+<span class="nc" id="L436">					currentNode = obstacleNode;</span>
+<span class="nc" id="L437">					return translateTime(command);</span>
+				} else {
+<span class="nc bnc" id="L439" title="All 2 branches missed.">					if (toFinalPosition.size() == 0) {</span>
+<span class="nc" id="L440">						System.out.println(&quot;Second Part (AStar): terminated!&quot;);</span>
+<span class="nc" id="L441">						grid.finished();</span>
+<span class="nc" id="L442">						done = true;</span>
+						
+						// Salvataggio file binario
+<span class="nc" id="L445">						ppcr.saveMapFile(bfs.getObstaclesMap(), &quot;map.dat&quot;);</span>
+						
+<span class="nc" id="L447">						return &quot;finished, 0&quot;;</span>
+					} else {
+<span class="nc" id="L449">						command = getCommand(currentNode, toFinalPosition.get(0), currentDirection);</span>
+<span class="nc" id="L450">						System.out.println(&quot;Node to reach: {x: &quot; + toFinalPosition.get(0).getX() + &quot;, y: &quot;</span>
+<span class="nc" id="L451">								+ toFinalPosition.get(0).getY() + &quot;}&quot;);</span>
+<span class="nc bnc" id="L452" title="All 2 branches missed.">						if (command.getAction() == &quot;w&quot;) {</span>
+<span class="nc" id="L453">							currentNode = toFinalPosition.remove(0);</span>
+						}
+						// Restituisco il comando
+<span class="nc" id="L456">						return translateTime(command);</span>
+					}
+
+				}
+
+			}
+		case &quot;reset&quot;:
+<span class="nc" id="L463">			System.out.println(&quot;\nResetting... &quot;);</span>
+<span class="nc" id="L464">			init(grid);</span>
+<span class="nc" id="L465">			return &quot;resetCompleted&quot;;</span>
+		default:
+<span class="nc" id="L467">			System.out.println(&quot;Received an unidentified keyword: &quot; + found);</span>
+<span class="nc" id="L468">			return &quot;error&quot;;</span>
+		}
+	}
+
+	private static String translateTime(Command command) {
+<span class="nc" id="L473">		int colTime = 165 * 9 / getCols();</span>
+<span class="nc" id="L474">		int rowTime = 165 * 8 / getRows();</span>
+
+<span class="nc bnc" id="L476" title="All 2 branches missed.">		int time = command.getDirection().equals(&quot;height&quot;) ? rowTime : colTime;</span>
+<span class="nc" id="L477">		return command.getAction() + &quot;, &quot; + time;</span>
+	}
+
+	public static int getRows() {
+<span class="fc" id="L481">		return rows;</span>
+	}
+
+	public static void setRows(int rows) {
+<span class="fc" id="L485">		ppcr.rows = rows;</span>
+<span class="fc" id="L486">	}</span>
+
+	public static int getCols() {
+<span class="fc" id="L489">		return cols;</span>
+	}
+
+	public static void setCols(int cols) {
+<span class="fc" id="L493">		ppcr.cols = cols;</span>
+<span class="fc" id="L494">	}</span>
+	
+	public static Grid getGrid() {
+<span class="nc" id="L497">		return grid;</span>
+	}
+
+	public static void setGrid(Grid grid) {
+<span class="fc" id="L501">		ppcr.grid = grid;</span>
+<span class="fc" id="L502">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

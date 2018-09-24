@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BFS.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">it.unibo.iss.temaFinaleReqOpz</a> &gt; <a href="index.source.html" class="el_package">it.unibo.ppcr.ai</a> &gt; <span class="el_source">BFS.java</span></div><h1>BFS.java</h1><pre class="source lang-java linenums">package it.unibo.ppcr.ai;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import it.unibo.ppcr.components.BFSNode;
+import it.unibo.ppcr.components.Node;
+import it.unibo.ppcr.components.Spot;
+
+public class BFS {
+	private boolean[][] obstaclesMap; // Area da visitare definita dal no di colonne e di righe dato in ingresso al
+										// costruttore
+	private Spot[][] visitedArea; // Area visitata: è true se la breadth first ha esplorato il nodo associato
+	private boolean[][] checked; // Matrice di nodi controllati dalla bfs: utile per non ricontrollare gli stessi
+									// nodi (abbiamo un grafo)!
+	private int rows;
+	private int cols;
+
+<span class="nc" id="L19">	private int nObstacles = 0;</span>
+<span class="nc" id="L20">	private int nSpotsCleaned = 1;</span>
+
+<span class="nc" id="L22">	public BFS(int rows, int cols) {</span>
+<span class="nc" id="L23">		this.obstaclesMap = new boolean[rows][cols];</span>
+<span class="nc" id="L24">		this.visitedArea = new Spot[rows][cols];</span>
+<span class="nc" id="L25">		this.rows = rows;</span>
+<span class="nc" id="L26">		this.cols = cols;</span>
+
+<span class="nc bnc" id="L28" title="All 2 branches missed.">		for (int i = 0; i &lt; visitedArea.length; i++) {</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">			for (int j = 0; j &lt; visitedArea[0].length; j++) {</span>
+<span class="nc" id="L30">				this.visitedArea[i][j] = new Spot(false, false);</span>
+			}
+		}
+<span class="nc" id="L33">	}</span>
+
+	public void printMaps() {
+<span class="nc bnc" id="L36" title="All 2 branches missed.">		for (int i = 0; i &lt; visitedArea.length; i++) {</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">			for (int j = 0; j &lt; visitedArea[0].length; j++) {</span>
+<span class="nc" id="L38">				System.out.println(&quot;[&quot; + i + &quot;,&quot; + j + &quot;]: &quot; + this.visitedArea[i][j]);</span>
+			}
+		}
+<span class="nc bnc" id="L41" title="All 2 branches missed.">		for (int i = 0; i &lt; obstaclesMap.length; i++) {</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">			for (int j = 0; j &lt; obstaclesMap[0].length; j++) {</span>
+<span class="nc" id="L43">				System.out.println(&quot;[&quot; + i + &quot;,&quot; + j + &quot;]: &quot; + this.obstaclesMap[i][j]);</span>
+			}
+		}
+<span class="nc" id="L46">	}</span>
+
+	public void setnObstacles(int nObstacles) {
+<span class="nc" id="L49">		this.nObstacles = nObstacles;</span>
+<span class="nc" id="L50">	}</span>
+
+	public boolean[][] getObstaclesMap() {
+<span class="nc" id="L53">		return obstaclesMap;</span>
+	}
+
+	public void setObstacle(Node node) {
+<span class="nc" id="L57">		this.obstaclesMap[node.getX()][node.getY()] = true;</span>
+<span class="nc" id="L58">	}</span>
+
+	public void setVisited(Node node) {
+<span class="nc" id="L61">		this.visitedArea[node.getX()][node.getY()].setVisited(true);</span>
+<span class="nc" id="L62">	}</span>
+
+	public List&lt;Node&gt; findUnreacheableSpots() {
+		// Prima di tutto occorre delineare come ostacoli gli spazi al centro di
+		// eventuali perimetri delineati durante l'esplorazione.
+		// Ad esempio occorre che avendo un quadrato grande come ostacolo trovato dal
+		// robot, esso consideri come ostacolo il perimetro, ma anche l'area!
+		// Perciò per ogni spazio lasciato non pulito, alla fine di bfs occorre
+		// verificare che ci sia un ostacolo su almeno due direzioni (in tal caso sarà
+		// segnato anch'esso come ostacolo). Se, invece, per uno spazio pulito esiste un
+		// ostacolo solo su una direzione, significa che esso è
+		// irraggiungibile poichè c'è un &quot;ostacolo inevitabile&quot; nella stanza.
+
+<span class="nc" id="L75">		List&lt;Node&gt; res = new ArrayList&lt;Node&gt;();</span>
+
+<span class="nc bnc" id="L77" title="All 2 branches missed.">		for (int i = 0; i &lt; visitedArea.length; i++) {</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">			for (int j = 0; j &lt; visitedArea[0].length; j++) {</span>
+				{
+<span class="nc bnc" id="L80" title="All 2 branches missed.">					if (!visitedArea[i][j].isVisited()) {</span>
+<span class="nc" id="L81">						int obsFound = 0;</span>
+						// Controllo ostacolo in basso:
+<span class="nc bnc" id="L83" title="All 2 branches missed.">						for (int k = i + 1; k &lt; rows + 1; k++) {</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">							if (k == rows)</span>
+<span class="nc" id="L85">								break;</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">							if (obstaclesMap[k][j]) {</span>
+<span class="nc" id="L87">								obsFound++;</span>
+<span class="nc" id="L88">								break;</span>
+							}
+
+						}
+						// Controllo ostacolo in alto:
+<span class="nc bnc" id="L93" title="All 2 branches missed.">						for (int k = 0; k &lt; i; k++) {</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">							if (obstaclesMap[k][j]) {</span>
+<span class="nc" id="L95">								obsFound++;</span>
+<span class="nc" id="L96">								break;</span>
+							}
+
+						}
+						// Controllo ostacolo a destra:
+<span class="nc bnc" id="L101" title="All 2 branches missed.">						for (int k = j + 1; k &lt; cols + 1; k++) {</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">							if (k == cols)</span>
+<span class="nc" id="L103">								break;</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">							if (obstaclesMap[i][k]) {</span>
+<span class="nc" id="L105">								obsFound++;</span>
+<span class="nc" id="L106">								break;</span>
+							}
+
+						}
+						// Controllo ostacolo a sinistra:
+<span class="nc bnc" id="L111" title="All 2 branches missed.">						for (int k = 0; k &lt; j; k++) {</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">							if (obstaclesMap[i][k]) {</span>
+<span class="nc" id="L113">								obsFound++;</span>
+<span class="nc" id="L114">								break;</span>
+							}
+
+						}
+<span class="nc bnc" id="L118" title="All 2 branches missed.">						if (obsFound &gt; 1) {</span>
+<span class="nc" id="L119">							obstaclesMap[i][j] = true;</span>
+<span class="nc" id="L120">							this.nObstacles++;</span>
+<span class="nc" id="L121">							res.add(new Node(i, j));</span>
+						} else
+<span class="nc" id="L123">							return new ArrayList&lt;Node&gt;();</span>
+
+					}
+				}
+
+			}
+		}
+<span class="nc" id="L130">		return res;</span>
+	}
+
+	public boolean impassableObstacle() {
+<span class="nc" id="L134">		int obs = this.nSpotsCleaned + this.nObstacles;</span>
+<span class="nc" id="L135">		System.out.println(this.rows * this.cols + &quot;==&quot; + obs);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">		return !(this.rows * this.cols == this.nSpotsCleaned + this.nObstacles);</span>
+	}
+
+	public List&lt;BFSNode&gt; findNearestUnvisitedNode(Node currentNode, int currentDirection) {
+		// printMaps();
+		List&lt;BFSNode&gt; pathNodes;
+<span class="nc" id="L142">		this.checked = new boolean[rows][cols];</span>
+<span class="nc" id="L143">		List&lt;BFSNode&gt; queue = new ArrayList&lt;BFSNode&gt;(); // Coda dei nodi da visitare</span>
+
+		boolean finished;
+
+		// Aggiungo il nodo alla coda
+<span class="nc" id="L148">		queue.add(new BFSNode(currentNode.getX(), currentNode.getY(), -1, null));</span>
+
+<span class="nc bnc" id="L150" title="All 2 branches missed.">		while (!queue.isEmpty()) {</span>
+<span class="nc" id="L151">			BFSNode currentBFSNode = queue.remove(0); // Tolgo il primo nodo. Se non ha una direzione, inserisco la</span>
+														// direzione attuale
+<span class="nc bnc" id="L153" title="All 2 branches missed.">			if (currentBFSNode.getDirection() != -1)</span>
+<span class="nc" id="L154">				currentDirection = currentBFSNode.getDirection();</span>
+<span class="nc" id="L155">			finished = nodeUnvisited(currentBFSNode); // Se il nodo considerato non è visitato, ho trovato il nodo da</span>
+														// visitare!
+<span class="nc bnc" id="L157" title="All 2 branches missed.">			if (finished) {</span>
+				// Dico che ho visitato il nodo e restituisco il path per arrivare a questo nodo
+<span class="nc" id="L159">				visitedArea[currentBFSNode.getX()][currentBFSNode.getY()].setVisited(true);</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">				if (!visitedArea[currentBFSNode.getX()][currentBFSNode.getY()].isOnce()) {</span>
+<span class="nc" id="L161">					visitedArea[currentBFSNode.getX()][currentBFSNode.getY()].setOnce(true);</span>
+<span class="nc" id="L162">					nSpotsCleaned++;</span>
+					// System.out.println(nSpotsCleaned);
+				}
+<span class="nc" id="L165">				pathNodes = new ArrayList&lt;BFSNode&gt;();</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">				while (currentBFSNode.getParent() != null) // Il get parent restituisce il genitore del nodo attuale</span>
+				{
+<span class="nc" id="L168">					pathNodes.add(0, currentBFSNode);</span>
+<span class="nc" id="L169">					currentBFSNode = currentBFSNode.getParent();</span>
+				}
+<span class="nc" id="L171">				return pathNodes;</span>
+			}
+			// Se non ho finito, controllo i nodi adiacenti e ne scelgo uno
+<span class="nc bnc" id="L174" title="All 2 branches missed.">			for (BFSNode node : findAdjacentNodes(currentBFSNode, currentDirection)) {</span>
+				// Il nodo adiacente trovato potrebbe essere non corretto ovvero:
+<span class="nc bnc" id="L176" title="All 8 branches missed.">				if (node.getX() &lt; this.rows &amp;&amp; node.getY() &lt; this.cols &amp;&amp; node.getX() &gt;= 0 &amp;&amp; node.getY() &gt;= 0) // a)</span>
+																												// trovarsi
+																												// fuori
+																												// dalla
+																												// matrice
+				{
+<span class="nc bnc" id="L182" title="All 4 branches missed.">					if (!checked[node.getX()][node.getY()] &amp;&amp; !isObstacle(node)) //// b) coincidere con un ostacolo (in</span>
+																					//// checked tengo nota dei nodi già
+																					//// controllati)
+					{
+						// Se il nodo adiacente trovato va bene, lo inserisco in quelli controllati e lo
+						// aggiungo alla lista
+<span class="nc" id="L188">						checked[node.getX()][node.getY()] = true;</span>
+<span class="nc" id="L189">						queue.add(node);</span>
+					}
+				}
+<span class="nc" id="L192">			}</span>
+<span class="nc" id="L193">		}</span>
+<span class="nc" id="L194">		return null;</span>
+	}
+
+	public List&lt;BFSNode&gt; findAdjacentNodes(BFSNode currentNode, int direction) {
+<span class="nc" id="L198">		List&lt;BFSNode&gt; adjacentNodes = new ArrayList&lt;BFSNode&gt;();</span>
+		// Movimento a spirale: ottimizzazione dell'algoritmo del 10-15% (commentare lo
+		// switch per attivare algoritmo &quot;normale&quot;)
+<span class="nc bnc" id="L201" title="All 5 branches missed.">		switch (direction) {</span>
+		case 0:
+<span class="nc" id="L203">			adjacentNodes.add(new BFSNode(currentNode.getX(), currentNode.getY() - 1, 1, currentNode));</span>
+<span class="nc" id="L204">			adjacentNodes.add(new BFSNode(currentNode.getX() + 1, currentNode.getY(), 0, currentNode));</span>
+<span class="nc" id="L205">			adjacentNodes.add(new BFSNode(currentNode.getX(), currentNode.getY() + 1, 3, currentNode));</span>
+<span class="nc" id="L206">			adjacentNodes.add(new BFSNode(currentNode.getX() - 1, currentNode.getY(), 2, currentNode));</span>
+<span class="nc" id="L207">			break;</span>
+		case 1:
+<span class="nc" id="L209">			adjacentNodes.add(new BFSNode(currentNode.getX() - 1, currentNode.getY(), 2, currentNode));</span>
+<span class="nc" id="L210">			adjacentNodes.add(new BFSNode(currentNode.getX(), currentNode.getY() - 1, 1, currentNode));</span>
+<span class="nc" id="L211">			adjacentNodes.add(new BFSNode(currentNode.getX() + 1, currentNode.getY(), 0, currentNode));</span>
+<span class="nc" id="L212">			adjacentNodes.add(new BFSNode(currentNode.getX(), currentNode.getY() + 1, 3, currentNode));</span>
+<span class="nc" id="L213">			break;</span>
+		case 2:
+<span class="nc" id="L215">			adjacentNodes.add(new BFSNode(currentNode.getX(), currentNode.getY() + 1, 3, currentNode));</span>
+<span class="nc" id="L216">			adjacentNodes.add(new BFSNode(currentNode.getX() - 1, currentNode.getY(), 2, currentNode));</span>
+<span class="nc" id="L217">			adjacentNodes.add(new BFSNode(currentNode.getX(), currentNode.getY() - 1, 1, currentNode));</span>
+<span class="nc" id="L218">			adjacentNodes.add(new BFSNode(currentNode.getX() + 1, currentNode.getY(), 0, currentNode));</span>
+<span class="nc" id="L219">			break;</span>
+		case 3:
+<span class="nc" id="L221">			adjacentNodes.add(new BFSNode(currentNode.getX() + 1, currentNode.getY(), 0, currentNode));</span>
+<span class="nc" id="L222">			adjacentNodes.add(new BFSNode(currentNode.getX(), currentNode.getY() + 1, 3, currentNode));</span>
+<span class="nc" id="L223">			adjacentNodes.add(new BFSNode(currentNode.getX() - 1, currentNode.getY(), 2, currentNode));</span>
+<span class="nc" id="L224">			adjacentNodes.add(new BFSNode(currentNode.getX(), currentNode.getY() - 1, 0, currentNode));</span>
+			break;
+		}
+		/*
+		 * //Movimento normale e case 3 del movimento a spirale adjacentNodes.add(new
+		 * BfsNode(currentNode.getX()+1,currentNode.getY(),0,currentNode));
+		 * adjacentNodes.add(new
+		 * BfsNode(currentNode.getX(),currentNode.getY()+1,3,currentNode));
+		 * adjacentNodes.add(new
+		 * BfsNode(currentNode.getX()-1,currentNode.getY(),2,currentNode));
+		 * adjacentNodes.add(new
+		 * BfsNode(currentNode.getX(),currentNode.getY()-1,0,currentNode));
+		 */
+<span class="nc" id="L237">		return adjacentNodes;</span>
+	}
+
+	private boolean nodeUnvisited(Node node) {
+<span class="nc bnc" id="L241" title="All 2 branches missed.">		return !visitedArea[node.getX()][node.getY()].isVisited();</span>
+	}
+
+	private boolean isObstacle(Node node) {
+<span class="nc" id="L245">		return obstaclesMap[node.getX()][node.getY()];</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

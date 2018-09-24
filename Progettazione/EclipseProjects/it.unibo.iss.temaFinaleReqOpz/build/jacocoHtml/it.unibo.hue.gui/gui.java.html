@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>gui.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">it.unibo.iss.temaFinaleReqOpz</a> &gt; <a href="index.source.html" class="el_package">it.unibo.hue.gui</a> &gt; <span class="el_source">gui.java</span></div><h1>gui.java</h1><pre class="source lang-java linenums">package it.unibo.hue.gui;
+
+import javax.swing.*;
+
+import it.unibo.hue.components.BluePlayer;
+import it.unibo.hue.components.hueClient;
+import it.unibo.qactors.akka.QActor;
+
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class gui {
+
+<span class="nc" id="L15">	private boolean party = true;</span>
+
+<span class="nc" id="L17">	public gui() {</span>
+<span class="nc" id="L18">		int num = hueClient.getNumLights();</span>
+
+<span class="nc" id="L20">		JPanel mainPanel = new JPanel();</span>
+<span class="nc" id="L21">		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));</span>
+
+<span class="nc bnc" id="L23" title="All 2 branches missed.">		if (num != 1) {</span>
+<span class="nc" id="L24">			JLabel onLabel = new JLabel(&quot;ON&quot;);</span>
+<span class="nc" id="L25">			onLabel.setAlignmentX(Component.CENTER_ALIGNMENT);</span>
+<span class="nc" id="L26">			mainPanel.add(onLabel);</span>
+		}
+
+<span class="nc" id="L29">		mainPanel.add(Box.createVerticalGlue());</span>
+
+<span class="nc" id="L31">		JPanel onPanel = new JPanel();</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">		for (int i = 1; i &lt; num + 1; i++) {</span>
+<span class="nc" id="L33">			final int index = i;</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">			JButton on = num == 1 ? new JButton(&quot;ON&quot;) : new JButton(&quot;&quot; + i);</span>
+<span class="nc" id="L35">			on.addActionListener(new ActionListener() {</span>
+				public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L37">					hueClient.on(index);</span>
+<span class="nc" id="L38">				}</span>
+			});
+<span class="nc" id="L40">			onPanel.add(on);</span>
+		}
+<span class="nc" id="L42">		mainPanel.add(onPanel);</span>
+
+<span class="nc" id="L44">		mainPanel.add(Box.createVerticalGlue());</span>
+
+<span class="nc bnc" id="L46" title="All 2 branches missed.">		if (num != 1) {</span>
+<span class="nc" id="L47">			JLabel offLabel = new JLabel(&quot;OFF&quot;);</span>
+<span class="nc" id="L48">			offLabel.setAlignmentX(Component.CENTER_ALIGNMENT);</span>
+<span class="nc" id="L49">			mainPanel.add(offLabel);</span>
+		}
+
+<span class="nc" id="L52">		mainPanel.add(Box.createVerticalGlue());</span>
+
+<span class="nc" id="L54">		JPanel offPanel = new JPanel();</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">		for (int i = 1; i &lt; num + 1; i++) {</span>
+<span class="nc" id="L56">			final int index = i;</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">			JButton off = num == 1 ? new JButton(&quot;OFF&quot;) : new JButton(&quot;&quot; + i);</span>
+<span class="nc" id="L58">			off.addActionListener(new ActionListener() {</span>
+				public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L60">					hueClient.off(index);</span>
+<span class="nc" id="L61">				}</span>
+			});
+<span class="nc" id="L63">			offPanel.add(off);</span>
+		}
+<span class="nc" id="L65">		mainPanel.add(offPanel);</span>
+
+<span class="nc" id="L67">		mainPanel.add(Box.createVerticalGlue());</span>
+
+<span class="nc bnc" id="L69" title="All 2 branches missed.">		if (num != 1) {</span>
+<span class="nc" id="L70">			JLabel blinkLabel = new JLabel(&quot;BLINK&quot;);</span>
+<span class="nc" id="L71">			blinkLabel.setAlignmentX(Component.CENTER_ALIGNMENT);</span>
+<span class="nc" id="L72">			mainPanel.add(blinkLabel);</span>
+		}
+
+<span class="nc" id="L75">		mainPanel.add(Box.createVerticalGlue());</span>
+
+<span class="nc" id="L77">		JPanel blinkPanel = new JPanel();</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">		for (int i = 1; i &lt; num + 1; i++) {</span>
+<span class="nc" id="L79">			final int index = i;</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">			JButton blink = num == 1 ? new JButton(&quot;BLINK&quot;) : new JButton(&quot;&quot; + i);</span>
+<span class="nc" id="L81">			blink.addActionListener(new ActionListener() {</span>
+				public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L83">					hueClient.blink(index);</span>
+<span class="nc" id="L84">				}</span>
+			});
+<span class="nc" id="L86">			blinkPanel.add(blink);</span>
+		}
+<span class="nc" id="L88">		mainPanel.add(blinkPanel);</span>
+
+<span class="nc" id="L90">		mainPanel.add(Box.createVerticalGlue());</span>
+
+		// EASTER EGG JUST FOR FUN: change party value to activate/deactivate
+<span class="nc bnc" id="L93" title="All 4 branches missed.">		if (party &amp;&amp; num!=1) {</span>
+<span class="nc" id="L94">			JLabel partyMode = new JLabel(&quot;PARTY MODE!&quot;);</span>
+<span class="nc" id="L95">			partyMode.setAlignmentX(Component.CENTER_ALIGNMENT);</span>
+<span class="nc" id="L96">			mainPanel.add(partyMode);</span>
+
+<span class="nc" id="L98">			mainPanel.add(Box.createVerticalGlue());</span>
+
+<span class="nc" id="L100">			JPanel partyPanel = new JPanel();</span>
+<span class="nc" id="L101">			JButton start = new JButton(&quot;START&quot;);</span>
+<span class="nc" id="L102">			start.addActionListener(new ActionListener() {</span>
+				public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L104">					BluePlayer.play();</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">					for (int i = 1; i &lt; num + 1; i++) {</span>
+						try {
+<span class="nc" id="L107">							Thread.sleep(250);</span>
+<span class="nc" id="L108">						} catch (InterruptedException e1) {</span>
+<span class="nc" id="L109">							e1.printStackTrace();</span>
+<span class="nc" id="L110">						}</span>
+<span class="nc" id="L111">						hueClient.blink(i);</span>
+					}
+<span class="nc" id="L113">				}</span>
+			});
+<span class="nc" id="L115">			partyPanel.add(start);</span>
+<span class="nc" id="L116">			JButton stop = new JButton(&quot;STOP&quot;);</span>
+<span class="nc" id="L117">			stop.addActionListener(new ActionListener() {</span>
+				public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L119">					BluePlayer.stop();</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">					for (int i = 1; i &lt; num + 1; i++) {</span>
+<span class="nc" id="L121">						hueClient.off(i);</span>
+					}
+<span class="nc" id="L123">				}</span>
+			});
+<span class="nc" id="L125">			partyPanel.add(stop);</span>
+<span class="nc" id="L126">			mainPanel.add(partyPanel);</span>
+		}
+
+<span class="nc" id="L129">		mainPanel.add(Box.createVerticalGlue());</span>
+
+<span class="nc" id="L131">		JFrame window = new JFrame(&quot;TEST&quot;);</span>
+<span class="nc" id="L132">		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);</span>
+<span class="nc" id="L133">		window.getContentPane().add(mainPanel);</span>
+<span class="nc" id="L134">		window.setLocationRelativeTo(null);</span>
+<span class="nc" id="L135">		window.setVisible(true);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">		if (num == 1)</span>
+<span class="nc" id="L137">			window.setSize(new Dimension(200, 200));</span>
+		else
+<span class="nc" id="L139">			window.pack();</span>
+<span class="nc" id="L140">		window.setResizable(false);</span>
+
+<span class="nc" id="L142">	}</span>
+
+	public static void main(String args[]) {
+<span class="nc" id="L145">		SwingUtilities.invokeLater(new Runnable() {</span>
+			@Override
+			public void run() {
+<span class="nc" id="L148">				new gui();</span>
+<span class="nc" id="L149">			}</span>
+		});
+<span class="nc" id="L151">	}</span>
+	
+	public static void startGui(QActor myself) {
+<span class="nc" id="L154">		new gui();</span>
+<span class="nc" id="L155">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

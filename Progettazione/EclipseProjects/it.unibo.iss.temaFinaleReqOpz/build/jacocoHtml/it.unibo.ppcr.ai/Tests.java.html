@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Tests.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">it.unibo.iss.temaFinaleReqOpz</a> &gt; <a href="index.source.html" class="el_package">it.unibo.ppcr.ai</a> &gt; <span class="el_source">Tests.java</span></div><h1>Tests.java</h1><pre class="source lang-java linenums">package it.unibo.ppcr.ai;
+
+<span class="nc" id="L3">public class Tests {</span>
+	public static void main(String[] args) {
+<span class="nc" id="L5">		ppcr.initForTests(4,4);</span>
+
+		// Test di un ostacolo inevitabile: griglia 4x4 con ostacoli su 0,1 1,1 2,1 3,1
+		//impassableExample();
+		
+		//Test di un reset: mando alcuni comandi in una griglia 4x4 e poi resetto e ricomincio
+		//resetExample();
+		
+		//Test di una keyword errata mandata alla mind
+		//wrongKeywordExample();
+
+		// BFS TEST:
+		// Primo esempio: griglia 4x4 con test dell'ostacolo in 3,1
+		//firstExample();
+
+		// Secondo esempio: griglia 4x4 con test dell'ostacolo in 1,1
+		//secondExample();
+
+		// Terzo esempio: griglia 4x4 con test su ostacolo 3,1+1,1
+		// Il primo è mobile, il secondo è fisso
+		// thirdExample();
+
+		// ASTAR TEST:
+		// Quarto esempio: terzo esempio + path sgombro per arrivare alla posizione
+		// finale (nessun ostacolo mobile rilevato)
+		//fourthExample();
+
+		// Quinto esempio: terzo esempio + ostacolo mobile trovato in 3,2
+<span class="nc" id="L33">		fifthExample();</span>
+
+<span class="nc" id="L35">	}</span>
+
+	private static void wrongKeywordExample() {
+<span class="nc" id="L38">		System.out.println(ppcr.getNextMove(&quot;eh le cose&quot;));		</span>
+<span class="nc" id="L39">	}</span>
+
+	private static void resetExample() {
+<span class="nc" id="L42">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L43">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+		
+<span class="nc" id="L45">		System.out.println(ppcr.getNextMove(&quot;reset&quot;));</span>
+		
+<span class="nc" id="L47">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L48">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+		
+<span class="nc" id="L50">	}</span>
+
+	private static void impassableExample() {
+<span class="nc" id="L53">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L54">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L55">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L56">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: clear (e sono in 3,0)
+		// MIND: vai verso 3,1
+<span class="nc" id="L60">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: obstacle sulla strada da 3,0 a 3,1
+		// MIND: torna in 3,0
+<span class="nc" id="L64">		System.out.println(ppcr.getNextMove(&quot;obstacle&quot;));</span>
+
+		// ROBOT: clear (e sono in 3,0)
+		// MIND: aspetta un tot di tempo e poi torna di nuovo in 3,1 per vedere se
+		// l'ostacolo c'è ancora
+<span class="nc" id="L69">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: obstacle di nuovo in 3,1
+		// MIND: marca 3,1 come ostacolo e torna indietro
+<span class="nc" id="L73">		System.out.println(ppcr.getNextMove(&quot;obstacle&quot;));</span>
+
+<span class="nc" id="L75">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L76">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L77">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: clear (e sono in 2,0)
+		// MIND: vai verso 2,1
+<span class="nc" id="L81">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: obstacle sulla strada da 2,0 a 2,1
+		// MIND: torna in 2,0
+<span class="nc" id="L85">		System.out.println(ppcr.getNextMove(&quot;obstacle&quot;));</span>
+
+		// ROBOT: clear (e sono in 2,0)
+		// MIND: aspetta un tot di tempo e poi torna di nuovo in 2,1 per vedere se
+		// l'ostacolo c'è ancora
+<span class="nc" id="L90">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: obstacle di nuovo in 2,1
+		// MIND: marca 2,1 come ostacolo e torna indietro
+<span class="nc" id="L94">		System.out.println(ppcr.getNextMove(&quot;obstacle&quot;));</span>
+
+<span class="nc" id="L96">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L97">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L98">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: clear (e sono in 1,0)
+		// MIND: vai verso 1,1
+<span class="nc" id="L102">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: obstacle sulla strada da 1,0 a 1,1
+		// MIND: torna in 1,0
+<span class="nc" id="L106">		System.out.println(ppcr.getNextMove(&quot;obstacle&quot;));</span>
+
+		// ROBOT: clear (e sono in 1,0)
+		// MIND: aspetta un tot di tempo e poi torna di nuovo in 1,1 per vedere se
+		// l'ostacolo c'è ancora
+<span class="nc" id="L111">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: obstacle di nuovo in 1,1
+		// MIND: marca 1,1 come ostacolo e torna indietro
+<span class="nc" id="L115">		System.out.println(ppcr.getNextMove(&quot;obstacle&quot;));</span>
+
+<span class="nc" id="L117">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L118">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L119">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: clear (e sono in 0,0)
+		// MIND: vai verso 0,1
+<span class="nc" id="L123">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: obstacle sulla strada da 0,0 a 0,1
+		// MIND: torna in 0,0
+<span class="nc" id="L127">		System.out.println(ppcr.getNextMove(&quot;obstacle&quot;));</span>
+
+		// ROBOT: clear (e sono in 0,0)
+		// MIND: aspetta un tot di tempo e poi torna di nuovo in 0,1 per vedere se
+		// l'ostacolo c'è ancora
+<span class="nc" id="L132">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: obstacle di nuovo in 0,1
+		// MIND: marca 0,1 come ostacolo e torna indietro
+<span class="nc" id="L136">		System.out.println(ppcr.getNextMove(&quot;obstacle&quot;));</span>
+		
+		// ROBOT: sono in 0,0
+		// Mind: ok ma non ci sono più strade da percorrere: c'è per forza un ostacolo inevitabile!
+<span class="nc" id="L140">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+<span class="nc" id="L142">	}</span>
+
+	private static void fifthExample() {
+<span class="nc" id="L145">		thirdExample();</span>
+
+<span class="nc" id="L147">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L148">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L149">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L150">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: obstacle sulla strada da 2,2 a 3,2
+		// MIND: torna in 2,2
+<span class="nc" id="L154">		System.out.println(ppcr.getNextMove(&quot;obstacle&quot;));</span>
+
+		// ROBOT: clear (e sono in 2,2)
+		// MIND: aspetta un tot di tempo e poi torna di nuovo in 3,2 per vedere se
+		// l'ostacolo c'è ancora
+<span class="nc" id="L159">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: obstacle trovato ancora sulla strada da 2,2 a 3,2
+		// MIND: torna in 2,2
+<span class="nc" id="L163">		System.out.println(ppcr.getNextMove(&quot;obstacle&quot;));</span>
+
+		// ROBOT: clear (e sono in 2,2)
+		// MIND: aspetta un tot di tempo e poi torna di nuovo in 3,2 per vedere se
+		// l'ostacolo c'è ancora
+<span class="nc" id="L168">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: finalmente in 3,2 l'ostacolo non c'è più!
+		// MIND: perfetto, continua normalmente
+<span class="nc" id="L172">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// END
+<span class="nc" id="L175">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L176">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+<span class="nc" id="L178">	}</span>
+
+	private static void fourthExample() {
+<span class="nc" id="L181">		thirdExample();</span>
+
+<span class="nc" id="L183">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L184">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L185">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L186">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L187">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L188">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L189">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L190">	}</span>
+
+	private static void thirdExample() {
+		// INIT
+<span class="nc" id="L194">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L195">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L196">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L197">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: clear (e sono in 3,0)
+		// MIND: vai verso 3,1
+<span class="nc" id="L201">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: obstacle sulla strada da 3,0 a 3,1
+		// MIND: torna in 3,0
+<span class="nc" id="L205">		System.out.println(ppcr.getNextMove(&quot;obstacle&quot;));</span>
+
+		// ROBOT: clear (e sono in 3,0)
+		// MIND: aspetta un tot di tempo e poi torna di nuovo in 3,1 per vedere se
+		// l'ostacolo c'è ancora
+<span class="nc" id="L210">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// CONSIDERO CASO IN CUI OSTACOLO IN 3,1 E' MOBILE!
+		// ROBOT: obstacle non c'è più in 3,1
+		// MIND: bene, continuo normalemente con l'algoritmo!
+<span class="nc" id="L215">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// PASSI IN MEZZO PRIMA DI ARRIVARE AL SECONDO OSTACOLO
+<span class="nc" id="L218">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L219">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L220">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L221">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L222">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L223">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L224">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L225">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L226">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: clear (e sono in 0,1)
+		// MIND: vai verso 1,1
+<span class="nc" id="L230">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: obstacle sulla strada da 0,1 a 1,1
+		// MIND: torna in 0,1
+<span class="nc" id="L234">		System.out.println(ppcr.getNextMove(&quot;obstacle&quot;));</span>
+
+		// ROBOT: clear (e sono in 0,1)
+		// MIND: aspetta un tot di tempo e poi torna di nuovo in 1,1 per vedere se
+		// l'ostacolo c'è ancora
+<span class="nc" id="L239">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// CONSIDERO CASO IN CUI OSTACOLO IN 1,1 E' FISSO!
+		// ROBOT: obstacle di nuovo in 1,1
+		// MIND: marca 1,1 come ostacolo e torna indietro
+<span class="nc" id="L244">		System.out.println(ppcr.getNextMove(&quot;obstacle&quot;));</span>
+
+		// ROBOT: clear su 0,1
+		// MIND: ti dirò di andare altrove a seconda dell'algoritmo, ma sicuro non in
+		// 1,1
+<span class="nc" id="L249">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// END
+<span class="nc" id="L252">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L253">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L254">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L255">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L256">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L257">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L258">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+<span class="nc" id="L260">	}</span>
+
+	private static void secondExample() {
+		// INIT
+<span class="nc" id="L264">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L265">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L266">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L267">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L268">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L269">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L270">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L271">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L272">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L273">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L274">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L275">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L276">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L277">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L278">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: clear (e sono in 0,1)
+		// MIND: vai verso 1,1
+<span class="nc" id="L282">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: obstacle sulla strada da 0,1 a 1,1
+		// MIND: torna in 0,1
+<span class="nc" id="L286">		System.out.println(ppcr.getNextMove(&quot;obstacle&quot;));</span>
+
+		// ROBOT: clear (e sono in 0,1)
+		// MIND: aspetta un tot di tempo e poi torna di nuovo in 1,1 per vedere se
+		// l'ostacolo c'è ancora
+<span class="nc" id="L291">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// CONSIDERO IL CASO IN CUI:
+		// L'ostacolo c'è ancora: è fisso quindi!
+		// ROBOT: obstacle di nuovo in 1,1
+		// MIND: marca 1,1 come ostacolo e torna indietro
+<span class="nc" id="L297">		System.out.println(ppcr.getNextMove(&quot;obstacle&quot;));</span>
+
+		// ROBOT: clear su 0,1
+		// MIND: ti dirò di andare altrove a seconda dell'algoritmo, ma sicuro non in
+		// 1,1
+<span class="nc" id="L302">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// END
+<span class="nc" id="L305">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L306">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L307">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L308">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L309">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L310">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L311">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L312">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L313">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+<span class="nc" id="L315">	}</span>
+
+	private static void firstExample() {
+		// INIT
+<span class="nc" id="L319">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L320">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L321">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L322">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: clear (e sono in 3,0)
+		// MIND: vai verso 3,1
+<span class="nc" id="L326">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// ROBOT: obstacle sulla strada da 3,0 a 3,1
+		// MIND: torna in 3,0
+<span class="nc" id="L330">		System.out.println(ppcr.getNextMove(&quot;obstacle&quot;));</span>
+
+		// ROBOT: clear (e sono in 3,0)
+		// MIND: aspetta un tot di tempo e poi torna di nuovo in 3,1 per vedere se
+		// l'ostacolo c'è ancora
+<span class="nc" id="L335">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+		// DUE CASI (eseguire uno dei due):
+		// 1) L'ostacolo c'è ancora: è fisso quindi!
+<span class="nc" id="L339">		firstExampleFirstCase();</span>
+		// 2) L'ostacolo non c'è più: era mobile!
+		// firstExampleSecondCase();
+
+		// END
+<span class="nc" id="L344">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L345">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L346">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L347">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L348">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L349">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L350">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L351">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L352">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L353">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L354">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L355">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L356">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L357">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L358">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L359">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L360">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L361">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L362">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L363">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+
+<span class="nc" id="L365">	}</span>
+
+	public static void firstExampleFirstCase() {
+		// ROBOT: obstacle di nuovo in 3,1
+		// MIND: marca 3,1 come ostacolo e torna indietro
+<span class="nc" id="L370">		System.out.println(ppcr.getNextMove(&quot;obstacle&quot;));</span>
+
+		// ROBOT: clear su 3,0
+		// MIND: ti dirò di andare altrove a seconda dell'algoritmo, ma sicuro non in
+		// 3,1
+<span class="nc" id="L375">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L376">	}</span>
+
+	public static void firstExampleSecondCase() {
+		// ROBOT: obstacle non c'è più in 3,1
+		// MIND: bene, continuo normalmente con l'algoritmo!
+<span class="nc" id="L381">		System.out.println(ppcr.getNextMove(&quot;clear&quot;));</span>
+<span class="nc" id="L382">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

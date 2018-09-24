@@ -75,6 +75,7 @@ public abstract class AbstractQacityinformationproban extends QActor {
 	    	String myselfName = "init";  
 	    	temporaryStr = "\"ACTIVATING CITY SERVER\"";
 	    	println( temporaryStr );  
+	    	runNodeJs( "./nodeCode/cityInformation/server.js -c Bologna --pr tcp --a localhost --po 1883 -o", "false"); 
 	     connectToMqttServer("tcp://localhost:1883");
 	    	repeatPlanNoTransition(pr,myselfName,"qacityinformationproban_"+myselfName,false,false);
 	    }catch(Exception e_init){  

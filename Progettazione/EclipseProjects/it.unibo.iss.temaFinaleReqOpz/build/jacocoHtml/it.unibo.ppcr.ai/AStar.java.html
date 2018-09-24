@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AStar.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">it.unibo.iss.temaFinaleReqOpz</a> &gt; <a href="index.source.html" class="el_package">it.unibo.ppcr.ai</a> &gt; <span class="el_source">AStar.java</span></div><h1>AStar.java</h1><pre class="source lang-java linenums">package it.unibo.ppcr.ai;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.PriorityQueue;
+
+import it.unibo.ppcr.components.AStarNode;
+import it.unibo.ppcr.components.Node;
+
+public class AStar {
+<span class="nc" id="L12">	private int hvCost = 10;</span>
+	private boolean[][] obstaclesMap;
+	private AStarNode[][] searchArea;
+	private PriorityQueue&lt;AStarNode&gt; openList;
+	private List&lt;AStarNode&gt; closedList;
+	private AStarNode initialNode;
+	private AStarNode finalNode;
+
+<span class="nc" id="L20">	public AStar(Node initialNode, Node finalNode, boolean[][] obstaclesMap) {</span>
+<span class="nc" id="L21">		setInitialNode(initialNode);</span>
+<span class="nc" id="L22">		setFinalNode(finalNode);</span>
+<span class="nc" id="L23">		this.obstaclesMap = obstaclesMap;</span>
+<span class="nc" id="L24">		this.searchArea = new AStarNode[obstaclesMap.length][obstaclesMap[0].length];</span>
+<span class="nc" id="L25">		this.openList = new PriorityQueue&lt;AStarNode&gt;(new Comparator&lt;AStarNode&gt;() {</span>
+			@Override
+			public int compare(AStarNode node0, AStarNode node1) {
+<span class="nc bnc" id="L28" title="All 4 branches missed.">				return node0.getF() &lt; node1.getF() ? -1 : node0.getF() &gt; node1.getF() ? 1 : 0;</span>
+			}
+		});
+<span class="nc" id="L31">		setNodes();</span>
+<span class="nc" id="L32">		this.closedList = new ArrayList&lt;AStarNode&gt;();</span>
+<span class="nc" id="L33">	}</span>
+
+	private void setNodes() {
+<span class="nc bnc" id="L36" title="All 2 branches missed.">		for (int i = 0; i &lt; searchArea.length; i++) {</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">			for (int j = 0; j &lt; searchArea[0].length; j++) {</span>
+<span class="nc" id="L38">				AStarNode node = new AStarNode(i, j);</span>
+<span class="nc" id="L39">				node.calculateHeuristic(getFinalNode());</span>
+<span class="nc" id="L40">				this.searchArea[i][j] = node;</span>
+			}
+		}
+<span class="nc" id="L43">	}</span>
+
+	public List&lt;Node&gt; findPath() {
+<span class="nc" id="L46">		openList.add(initialNode);</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">		while (!isEmpty(openList)) {</span>
+<span class="nc" id="L48">			AStarNode currentNode = openList.poll();</span>
+<span class="nc" id="L49">			closedList.add(currentNode);</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">			if (isFinalNode(currentNode)) {</span>
+<span class="nc" id="L51">				return getPath(currentNode);</span>
+			} else {
+<span class="nc" id="L53">				addAdjacentNodes(currentNode);</span>
+			}
+<span class="nc" id="L55">		}</span>
+<span class="nc" id="L56">		return new ArrayList&lt;Node&gt;();</span>
+	}
+
+	private List&lt;Node&gt; getPath(AStarNode currentNode) {
+<span class="nc" id="L60">		List&lt;Node&gt; path = new ArrayList&lt;Node&gt;();</span>
+<span class="nc" id="L61">		path.add(currentNode);</span>
+		AStarNode parent;
+<span class="nc bnc" id="L63" title="All 2 branches missed.">		while ((parent = currentNode.getParent()) != null) {</span>
+<span class="nc" id="L64">			path.add(0, parent);</span>
+<span class="nc" id="L65">			currentNode = parent;</span>
+		}
+<span class="nc" id="L67">		return path;</span>
+	}
+
+	private void addAdjacentNodes(AStarNode currentNode) {
+<span class="nc" id="L71">		addAdjacentUpperRow(currentNode);</span>
+<span class="nc" id="L72">		addAdjacentMiddleRow(currentNode);</span>
+<span class="nc" id="L73">		addAdjacentLowerRow(currentNode);</span>
+<span class="nc" id="L74">	}</span>
+
+	private void addAdjacentLowerRow(AStarNode currentNode) {
+<span class="nc" id="L77">		int row = currentNode.getX();</span>
+<span class="nc" id="L78">		int col = currentNode.getY();</span>
+<span class="nc" id="L79">		int lowerRow = row + 1;</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">		if (lowerRow &lt; getSearchArea().length) {</span>
+<span class="nc" id="L81">			checkNode(currentNode, col, lowerRow, getHvCost());</span>
+		}
+<span class="nc" id="L83">	}</span>
+
+	private void addAdjacentMiddleRow(AStarNode currentNode) {
+<span class="nc" id="L86">		int row = currentNode.getX();</span>
+<span class="nc" id="L87">		int col = currentNode.getY();</span>
+<span class="nc" id="L88">		int middleRow = row;</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">		if (col - 1 &gt;= 0) {</span>
+<span class="nc" id="L90">			checkNode(currentNode, col - 1, middleRow, getHvCost());</span>
+		}
+<span class="nc bnc" id="L92" title="All 2 branches missed.">		if (col + 1 &lt; getSearchArea()[0].length) {</span>
+<span class="nc" id="L93">			checkNode(currentNode, col + 1, middleRow, getHvCost());</span>
+		}
+<span class="nc" id="L95">	}</span>
+
+	private void addAdjacentUpperRow(AStarNode currentNode) {
+<span class="nc" id="L98">		int row = currentNode.getX();</span>
+<span class="nc" id="L99">		int col = currentNode.getY();</span>
+<span class="nc" id="L100">		int upperRow = row - 1;</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">		if (upperRow &gt;= 0) {</span>
+<span class="nc" id="L102">			checkNode(currentNode, col, upperRow, getHvCost());</span>
+		}
+<span class="nc" id="L104">	}</span>
+
+	private void checkNode(AStarNode currentNode, int col, int row, int cost) {
+<span class="nc" id="L107">		AStarNode adjacentNode = getSearchArea()[row][col];</span>
+<span class="nc bnc" id="L108" title="All 4 branches missed.">		if (!isBlock(adjacentNode) &amp;&amp; !getClosedList().contains(adjacentNode)) {</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">			if (!getOpenList().contains(adjacentNode)) {</span>
+<span class="nc" id="L110">				adjacentNode.setNodeData(currentNode, cost);</span>
+<span class="nc" id="L111">				getOpenList().add(adjacentNode);</span>
+			} else {
+<span class="nc" id="L113">				boolean changed = adjacentNode.checkBetterPath(currentNode, cost);</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">				if (changed) {</span>
+					// Remove and Add the changed node, so that the PriorityQueue can sort again its
+					// contents with the modified &quot;finalCost&quot; value of the modified node
+<span class="nc" id="L117">					getOpenList().remove(adjacentNode);</span>
+<span class="nc" id="L118">					getOpenList().add(adjacentNode);</span>
+				}
+			}
+		}
+<span class="nc" id="L122">	}</span>
+	
+	private boolean isBlock(AStarNode node)
+	{
+<span class="nc" id="L126">		return obstaclesMap[node.getX()][node.getY()];</span>
+	}
+
+	private boolean isFinalNode(AStarNode currentNode) {
+<span class="nc" id="L130">		return currentNode.equals(finalNode);</span>
+	}
+
+	private boolean isEmpty(PriorityQueue&lt;AStarNode&gt; openList) {
+<span class="nc bnc" id="L134" title="All 2 branches missed.">		return openList.size() == 0;</span>
+	}
+
+	public AStarNode getInitialNode() {
+<span class="nc" id="L138">		return initialNode;</span>
+	}
+
+	public void setInitialNode(Node initialNode) {
+<span class="nc" id="L142">		this.initialNode = new AStarNode(initialNode.getX(), initialNode.getY());</span>
+<span class="nc" id="L143">	}</span>
+
+	public AStarNode getFinalNode() {
+<span class="nc" id="L146">		return finalNode;</span>
+	}
+
+	public void setFinalNode(Node finalNode) {
+<span class="nc" id="L150">		this.finalNode = new AStarNode(finalNode.getX(), finalNode.getY());</span>
+<span class="nc" id="L151">	}</span>
+
+	public AStarNode[][] getSearchArea() {
+<span class="nc" id="L154">		return searchArea;</span>
+	}
+
+	public void setSearchArea(AStarNode[][] searchArea) {
+<span class="nc" id="L158">		this.searchArea = searchArea;</span>
+<span class="nc" id="L159">	}</span>
+
+	public PriorityQueue&lt;AStarNode&gt; getOpenList() {
+<span class="nc" id="L162">		return openList;</span>
+	}
+
+	public void setOpenList(PriorityQueue&lt;AStarNode&gt; openList) {
+<span class="nc" id="L166">		this.openList = openList;</span>
+<span class="nc" id="L167">	}</span>
+
+	public List&lt;AStarNode&gt; getClosedList() {
+<span class="nc" id="L170">		return closedList;</span>
+	}
+
+	public void setClosedList(List&lt;AStarNode&gt; closedList) {
+<span class="nc" id="L174">		this.closedList = closedList;</span>
+<span class="nc" id="L175">	}</span>
+
+	public int getHvCost() {
+<span class="nc" id="L178">		return hvCost;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,33 @@
+/*
+*
+* A GraphViz DOT FSM description 
+* Please use a GraphViz visualizer (like http://www.webgraphviz.com)
+*  
+*/
+
+digraph finite_state_machine {
+	rankdir=LR
+	size="8,5"
+	
+	init [ color = red ][ fontcolor = red ][ penwidth = 3 ]
+	handleCmd [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	waitForCommand [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	robotResponse [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	waitForFrontendActivation [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	waitForRobotResponse [ color = black ][ fontcolor = black ][ penwidth = 3 ]
+	finish [ color = blue ][ fontcolor = blue ][ penwidth = 3 ]
+	
+	init -> waitForFrontendActivation [ label = "switch" ][ color = black ][ fontcolor = black ]
+	waitForCommand -> finish [ label = "finished" ][ color = black ][ fontcolor = black ]
+	waitForRobotResponse -> robotResponse [ label = "robotAnswerMid" ][ color = black ][ fontcolor = black ]
+	robotResponse -> waitForCommand [ label = "switch" ][ color = black ][ fontcolor = black ]
+	waitForCommand -> handleToutBuiltIn [ label = "timeout(100000)" ][ color = green ][ fontcolor = green ]
+	waitForCommand -> handleCmd [ label = "robotCmd" ][ color = black ][ fontcolor = black ]
+	waitForRobotResponse -> finish [ label = "finished" ][ color = black ][ fontcolor = black ]
+	waitForRobotResponse -> handleToutBuiltIn [ label = "timeout(100000)" ][ color = green ][ fontcolor = green ]
+	waitForFrontendActivation -> handleToutBuiltIn [ label = "timeout(30000000)" ][ color = green ][ fontcolor = green ]
+	waitForFrontendActivation -> finish [ label = "finished" ][ color = black ][ fontcolor = black ]
+	handleCmd -> waitForRobotResponse [ label = "switch" ][ color = black ][ fontcolor = black ]
+	waitForFrontendActivation -> waitForFrontendActivation [ label = "repeat "][ style = dashed ][ color = blue ][ fontcolor = blue ]
+	waitForFrontendActivation -> waitForCommand [ label = "robotAnswerMid" ][ color = black ][ fontcolor = black ]
+}

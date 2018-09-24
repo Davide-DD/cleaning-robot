@@ -75,7 +75,6 @@ public abstract class AbstractQafrontend extends QActor {
 	    try{	
 	     PlanRepeat pr = PlanRepeat.setUp("init",-1);
 	    	String myselfName = "init";  
-	     connectToMqttServer("tcp://localhost:1883");
 	    	//switchTo waitForCommands
 	        switchToPlanAsNextState(pr, myselfName, "qafrontend_"+myselfName, 
 	              "waitForCommands",false, false, null); 

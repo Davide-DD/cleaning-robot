@@ -384,7 +384,7 @@ public class ppcr {
 							// 2) Check ostacoli invalicabili
 							if (bfs.impassableObstacle()) {
 								System.out.println("Found an impassable obstacle! Stopping..");
-								grid.impassableObstacle();
+								//grid.impassableObstacle();
 								return "impassableObstacle";
 							}
 
@@ -393,7 +393,7 @@ public class ppcr {
 							toFinalPosition = astar.findPath();
 							if (toFinalPosition.size() == 0) {
 								System.out.println("Could not find a path to reach final position! Stopping..");
-								grid.obstructedFinalPosition();
+								//grid.obstructedFinalPosition();
 								return "obstructedFinalPosition";
 							}
 
@@ -438,7 +438,7 @@ public class ppcr {
 				} else {
 					if (toFinalPosition.size() == 0) {
 						System.out.println("Second Part (AStar): terminated!");
-						grid.finished();
+						//grid.finished();
 						done = true;
 						
 						// Salvataggio file binario

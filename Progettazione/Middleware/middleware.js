@@ -119,6 +119,16 @@ toQActorSocket.on('data', function (data) {
 		
 		// Remove spaces inside qaanswer
 		qaanswer = qaanswer.replace(/\s+/g, '');
+		
+		if (qaanswer.includes("finished") || qaanswer.includes("impassableObstacle") ||
+		qaanswer.includes("error") || qaanswer.includes("obstructedFinalPosition")) {
+			setTimeout(sendClear, timeToWait);
+			sendClear();
+			setTimeout(sendClear, timeToWait);
+			process.exit();
+			return;
+		}
+		
 		dataTemp = qaanswer.substring(qaanswer.indexOf(",")+ 1);
 		console.log("dataTemp: " + dataTemp);
 		temp = dataTemp.substring(dataTemp.indexOf(","));
@@ -152,9 +162,6 @@ toQActorSocket.on('data', function (data) {
 				secondPart = true;
 				//sendClear();
 				setTimeout(sendClear, timeToWait);
-				return;
-			case "finished":
-				toSoffrittiSocket.pause();
 				return;
 		}
 		command = JSON.stringify({ "type": directionForSoffritti, "arg": timeReceived });

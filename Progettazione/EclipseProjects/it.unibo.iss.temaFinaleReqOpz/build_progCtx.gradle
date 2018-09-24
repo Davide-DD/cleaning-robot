@@ -161,6 +161,11 @@ task copyInfoForDist << {
 		include '**/*.*'
  	}
 	copy { 
+		from 'nodeCode'
+		into 'src/dist/nodeCode/'
+		include '**/*.*'
+ 	}	
+	copy { 
 		from '.'
 		into 'src/dist/'
 		include '*.pl'
