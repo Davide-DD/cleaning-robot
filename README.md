@@ -11,7 +11,7 @@ In particolare si segnalano:
   
 Il resto dei file non è importante (oltre che spesso concettualmente sbagliato, provenendo dai primissimi tentativi di analisi).
 
-## Authori
+## Autori
 
 * Andrea Boscarino - *Analisi dei requisiti, analisi del problema, scrittura modelli QActor, revisione test JUnit e Middleware*
 * Davide Di Donato - *Analisi dei requisiti, analisi del problema, revisione e debugging modelli QActor, scrittura test JUnit, Frontend e server CityInformation*
